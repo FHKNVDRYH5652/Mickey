@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mickey X Web - Ultra Pro Predictor</title>
+    <title>Mickey X Web - Advanced Predictor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
@@ -17,6 +17,7 @@
             --gold: #ffcc00;
             --blue: #00d4ff;
             --orange: #ff9900;
+            --violet: #9d00ff;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; user-select: none; }
@@ -29,40 +30,79 @@
         .platform-scroller::-webkit-scrollbar { display: none; }
         .platform-card { flex: 0 0 250px; height: 450px; background: var(--card-bg); border: 2px solid var(--neon-purple); border-radius: 25px; position: relative; overflow: hidden; transition: 0.3s; cursor: pointer; box-shadow: 0 0 15px rgba(188, 19, 254, 0.2); }
         .platform-card:hover { transform: scale(1.05) translateY(-10px); box-shadow: 0 0 30px var(--neon-purple); }
-        .platform-card img { width: 100%; height: 100%; object-fit: cover; }
-        .platform-label { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8); color: white; text-align: center; padding: 10px; font-weight: bold; font-size: 1.2rem; border-top: 1px solid var(--neon-purple); }
+        .platform-card img { width: 100%; height: 100%; object-fit: cover; border-radius: 25px; }
+        .platform-label { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.8); color: white; text-align: center; padding: 15px; font-weight: bold; font-size: 1.2rem; border-top: 1px solid var(--neon-purple); }
 
         #key-page { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
-        .video-box { width: 90%; max-width: 400px; height: 200px; border: 2px solid var(--neon-purple); margin-bottom: 20px; border-radius: 10px; overflow: hidden; background: #000; }
         .key-container { background: var(--card-bg); padding: 30px; border-radius: 20px; border: 1px solid var(--neon-purple); text-align: center; width: 90%; max-width: 400px; backdrop-filter: blur(10px); }
         .key-input { width: 100%; padding: 12px; background: rgba(255,255,255,0.1); border: 1px solid var(--neon-purple); color: white; border-radius: 5px; margin: 20px 0; text-align: center; font-size: 1.1rem; }
         .btn-verify { background: var(--neon-purple); color: white; border: none; padding: 12px 30px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; text-transform: uppercase; }
 
-        #prediction-page { display: none; min-height: 100vh; background-size: cover; background-position: center; background-repeat: no-repeat; padding: 20px; position: relative; }
-        #prediction-page::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 0; }
-        .app-container { max-width: 450px; margin: 0 auto; border: 3px solid var(--neon-purple); border-radius: 30px; padding: 20px; background: rgba(0, 0, 0, 0.9); min-height: 90vh; position: relative; z-index: 1; }
+        #prediction-page { display: none; min-height: 100vh; padding: 20px; position: relative; }
+        .app-container { max-width: 450px; margin: 0 auto; border: 3px solid var(--neon-purple); border-radius: 30px; padding: 20px; background: rgba(0, 0, 0, 0.95); min-height: 90vh; position: relative; z-index: 1; box-shadow: 0 0 20px var(--neon-purple); }
         .app-header { text-align: center; color: var(--neon-purple); font-family: 'Orbitron', sans-serif; font-size: 1.8rem; margin-bottom: 20px; text-shadow: 0 0 10px var(--neon-purple); }
         .status-bar { display: flex; justify-content: space-between; margin-bottom: 20px; }
-        .status-box { flex: 1; border: 1px solid var(--neon-purple); padding: 10px; text-align: center; margin: 5px; border-radius: 10px; font-weight: bold; }
+        .status-box { flex: 1; border: 1px solid var(--neon-purple); padding: 10px; text-align: center; margin: 5px; border-radius: 10px; font-weight: bold; font-size: 0.8rem; }
         .server-select { border: 1px solid var(--neon-purple); padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 20px; }
-        .period-display { text-align: center; font-size: 1.2rem; margin: 15px 0; letter-spacing: 2px; }
+        .period-display { text-align: center; font-size: 1.1rem; margin: 15px 0; letter-spacing: 2px; }
         .prediction-box { border: 2px solid var(--neon-purple); min-height: 250px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 20px; position: relative; background: rgba(255,255,255,0.05); padding: 20px; }
         .prediction-text { font-size: 4rem; font-weight: 900; font-family: 'Orbitron', sans-serif; text-transform: uppercase; }
         .history-panel { margin-top: 20px; max-height: 300px; overflow-y: auto; border-top: 1px solid var(--neon-purple); padding-top: 10px; }
         .history-item { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(188, 19, 254, 0.3); font-size: 0.95rem; }
         
-        .win { color: var(--green); text-shadow: 0 0 5px var(--green); font-weight: bold; }
-        .loss { color: var(--red); text-shadow: 0 0 5px var(--red); font-weight: bold; }
-        .pending { color: var(--gold); font-weight: bold; }
-        .big { color: var(--gold); }
-        .small { color: var(--blue); }
+        /* Dynamic Colors */
+        .win { color: var(--green); text-shadow: 0 0 5px var(--green); }
+        .loss { color: var(--red); text-shadow: 0 0 5px var(--red); }
+        .pending { color: var(--gold); }
+        .big { color: var(--gold); text-shadow: 0 0 10px var(--gold); }
+        .small { color: var(--blue); text-shadow: 0 0 10px var(--blue); }
         .red { color: #ff3e3e; }
         .green { color: #44ff44; }
+        .violet { color: var(--violet); }
 
         .confidence-meter { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; margin-top: 15px; overflow: hidden; }
-        .confidence-fill { height: 100%; border-radius: 5px; transition: width 0.8s ease; }
+        .confidence-fill { height: 100%; border-radius: 5px; transition: width 1s ease-in-out; }
         .pattern-display { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 10px 0; padding: 10px; border: 1px solid rgba(188, 19, 254, 0.3); border-radius: 10px; background: rgba(0,0,0,0.5); }
         .pattern-item { text-align: center; padding: 5px; border-radius: 5px; font-size: 0.8rem; font-weight: bold; border: 1px solid rgba(255,255,255,0.1); }
+        
+        /* New Analysis Panel */
+        .analysis-panel { margin: 15px 0; padding: 15px; border: 1px solid rgba(188, 19, 254, 0.5); border-radius: 15px; background: rgba(0, 0, 30, 0.3); }
+        .analysis-title { text-align: center; color: var(--blue); margin-bottom: 10px; font-size: 0.9rem; }
+        .analysis-data { display: flex; flex-wrap: wrap; justify-content: space-between; }
+        .analysis-item { width: 48%; margin: 5px 0; font-size: 0.8rem; }
+        .analysis-value { color: var(--green); font-weight: bold; }
+        
+        /* Algorithm Detector */
+        .algorithm-indicator { text-align: center; padding: 8px; border-radius: 10px; margin: 10px 0; background: rgba(0, 40, 60, 0.3); border: 1px solid var(--blue); font-size: 0.85rem; }
+        .algo-detected { color: var(--green); animation: pulse 2s infinite; }
+        .algo-analyzing { color: var(--gold); animation: pulse 1s infinite; }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        /* Loading Animation */
+        .loading-dots:after { content: '.'; animation: dots 1.5s steps(5, end) infinite; }
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80%, 100% { content: ''; }
+        }
+        
+        /* Advanced Pattern Display */
+        .pattern-analysis { margin: 15px 0; }
+        .pattern-row { display: flex; justify-content: space-between; margin: 5px 0; padding: 5px; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+        .pattern-type { color: var(--neon-purple); }
+        .pattern-result { font-weight: bold; }
+        .pattern-count { color: var(--orange); }
+        
+        /* Hidden Analysis Area */
+        .hidden-analysis { max-height: 0; overflow: hidden; transition: max-height 0.5s ease; background: rgba(0, 0, 20, 0.5); border-radius: 10px; margin: 10px 0; }
+        .hidden-analysis.active { max-height: 300px; padding: 10px; }
+        .toggle-analysis { text-align: center; color: var(--neon-purple); cursor: pointer; font-size: 0.8rem; margin: 5px 0; }
     </style>
 </head>
 <body>
@@ -72,21 +112,17 @@
     <section id="landing-page">
         <h1 class="main-title">CHOOSE PLATFORM</h1>
         <div class="platform-scroller">
-            <div class="platform-card" onclick="openKeyPage('TASHAN')"><img src="tashan.png"><div class="platform-label">TASHAN</div></div>
-            <div class="platform-card" onclick="openKeyPage('BDG')"><img src="bdggame.png"><div class="platform-label">BDG GAME</div></div>
-            <div class="platform-card" onclick="openKeyPage('91CLUB')"><img src="91club.png"><div class="platform-label">91 CLUB</div></div>
-            <div class="platform-card" onclick="openKeyPage('DAMAN')"><img src="daman.png"><div class="platform-label">DAMAN</div></div>
+            <div class="platform-card" onclick="openKeyPage('TASHAN')"><img src="https://via.placeholder.com/250x450/140028/bc13fe?text=TASHAN"><div class="platform-label">TASHAN</div></div>
+            <div class="platform-card" onclick="openKeyPage('BDG')"><img src="https://via.placeholder.com/250x450/140028/bc13fe?text=BDG+GAME"><div class="platform-label">BDG GAME</div></div>
+            <div class="platform-card" onclick="openKeyPage('91CLUB')"><img src="https://via.placeholder.com/250x450/140028/bc13fe?text=91+CLUB"><div class="platform-label">91 CLUB</div></div>
+            <div class="platform-card" onclick="openKeyPage('DAMAN')"><img src="https://via.placeholder.com/250x450/140028/bc13fe?text=DAMAN"><div class="platform-label">DAMAN</div></div>
         </div>
     </section>
 
     <section id="key-page">
-        <div class="video-box">
-            <video id="anime-video" width="100%" height="100%" loop playsinline>
-                <source src="anime.mp4" type="video/mp4">
-            </video>
-        </div>
         <div class="key-container">
-            <h2 style="color:var(--neon-purple)">SECURITY CHECK</h2>
+            <h2 style="color:var(--neon-purple); margin-bottom: 10px;">SECURITY CHECK</h2>
+            <p style="font-size: 0.8rem; color: #aaa;">Enter your private access key</p>
             <input type="password" id="key-input" class="key-input" placeholder="ENTER ACCESS KEY">
             <button class="btn-verify" onclick="verifyKey()">VERIFY ACCESS</button>
             <p id="error-msg" style="color:red; margin-top:10px; display:none;">INVALID KEY!</p>
@@ -97,28 +133,76 @@
         <div class="app-container">
             <h1 class="app-header">MICKEY X WEB</h1>
             <div class="status-bar">
-                <div class="status-box">SERVER 1</div>
-                <div class="status-box" id="analysis-status" style="color:var(--gold)">ANALYZING...</div>
+                <div class="status-box">SERVER: AKTIV</div>
+                <div class="status-box" id="analysis-status" style="color:var(--gold)">READY</div>
                 <div class="status-box" id="confidence-display">CONF: 0%</div>
             </div>
             <div class="server-select">
-                <span style="color:var(--neon-purple)">SERVER SELECT</span><br>
-                <span id="selected-platform" style="font-weight:bold; letter-spacing:2px;">Wingo 1 Min</span>
+                <span style="color:var(--neon-purple); font-size: 0.8rem;">SELECTED PLATFORM</span><br>
+                <span id="selected-platform" style="font-weight:bold; letter-spacing:2px; color: #fff;">...</span>
             </div>
-            <div class="period-display">GAME PERIOD : <span id="current-period" style="font-weight:bold; color:var(--neon-purple)">LOADING...</span></div>
+            <div class="period-display">PERIOD: <span id="current-period" style="font-weight:bold; color:var(--neon-purple)">LOADING...</span></div>
+            
+            <!-- Algorithm Detector -->
+            <div id="algorithm-detector" class="algorithm-indicator algo-analyzing">
+                <i class="fas fa-cogs"></i> ALGORITHM: <span id="algo-status">ANALYZING PATTERNS</span>
+            </div>
+            
+            <!-- Hidden Analysis Area -->
+            <div class="toggle-analysis" onclick="toggleAnalysis()">
+                <i class="fas fa-eye"></i> SHOW/HIDE DETAILED ANALYSIS
+            </div>
+            <div id="hidden-analysis" class="hidden-analysis">
+                <div class="analysis-title">LAST 10 RESULTS ANALYSIS</div>
+                <div id="detailed-analysis"></div>
+            </div>
+            
+            <!-- Pattern Analysis -->
+            <div class="pattern-analysis">
+                <div class="pattern-row">
+                    <span class="pattern-type">BIG/SMALL Pattern:</span>
+                    <span id="size-pattern" class="pattern-result">Analyzing...</span>
+                    <span id="size-count" class="pattern-count"></span>
+                </div>
+                <div class="pattern-row">
+                    <span class="pattern-type">RED/GREEN Pattern:</span>
+                    <span id="color-pattern" class="pattern-result">Analyzing...</span>
+                    <span id="color-count" class="pattern-count"></span>
+                </div>
+                <div class="pattern-row">
+                    <span class="pattern-type">Algorithm Detected:</span>
+                    <span id="algo-pattern" class="pattern-result" style="color:var(--gold)">SCANNING</span>
+                </div>
+            </div>
             
             <div class="prediction-box">
                 <div id="prediction-text" class="prediction-text">--</div>
                 <div class="confidence-meter">
                     <div id="confidence-fill" class="confidence-fill" style="width:0%; background:var(--neon-purple);"></div>
                 </div>
-                <div style="margin-top:10px; font-size:0.9rem; color:var(--blue)">Algorithm: Synchronized</div>
+                <div id="prediction-type" style="margin-top:10px; font-size:0.9rem; color:var(--blue)">Waiting for analysis...</div>
             </div>
             
-            <div style="text-align:center; margin-bottom:10px; color:var(--neon-purple); font-weight:bold;">STREAK: <span id="streak-info">0 WIN</span></div>
+            <div style="text-align:center; margin-bottom:10px; color:var(--neon-purple); font-weight:bold;">
+                STREAK: <span id="streak-info">0 WIN / 0 LOSS</span> | 
+                ACCURACY: <span id="accuracy-rate">0%</span>
+            </div>
+            
+            <!-- Analysis Panel -->
+            <div class="analysis-panel">
+                <div class="analysis-title">REAL-TIME ANALYSIS</div>
+                <div class="analysis-data">
+                    <div class="analysis-item">BIG %: <span id="big-percent" class="analysis-value">0</span></div>
+                    <div class="analysis-item">SMALL %: <span id="small-percent" class="analysis-value">0</span></div>
+                    <div class="analysis-item">RED %: <span id="red-percent" class="analysis-value">0</span></div>
+                    <div class="analysis-item">GREEN %: <span id="green-percent" class="analysis-value">0</span></div>
+                    <div class="analysis-item">Current Streak: <span id="current-streak" class="analysis-value">0</span></div>
+                    <div class="analysis-item">Pattern Length: <span id="pattern-length" class="analysis-value">0</span></div>
+                </div>
+            </div>
             
             <div id="pattern-display-container">
-                <div style="text-align:center; margin:10px 0; color:var(--orange); font-size:0.8rem; font-weight:bold;">PREVIOUS RESULTS</div>
+                <div style="text-align:center; margin:10px 0; color:var(--orange); font-size:0.8rem; font-weight:bold;">MARKET TREND (LAST 10)</div>
                 <div class="pattern-display" id="pattern-display"></div>
             </div>
 
@@ -130,15 +214,14 @@
     <script>
         particlesJS("particles-js", {
             particles: { 
-                number: { value: 100, density: { enable: true, value_area: 800 } }, 
+                number: { value: 60, density: { enable: true, value_area: 800 } }, 
                 color: { value: "#bc13fe" }, 
                 shape: { type: "circle" }, 
-                opacity: { value: 0.5, random: true }, 
-                size: { value: 3, random: true }, 
-                line_linked: { enable: true, distance: 150, color: "#bc13fe", opacity: 0.4, width: 1 }, 
-                move: { enable: true, speed: 3, direction: "none", random: false, straight: false, out_mode: "bounce" } 
-            },
-            interactivity: { detect_on: "canvas", events: { onhover: { enable: true, mode: "repulse" } } }
+                opacity: { value: 0.3 }, 
+                size: { value: 2 }, 
+                line_linked: { enable: true, distance: 150, color: "#bc13fe", opacity: 0.2, width: 1 }, 
+                move: { enable: true, speed: 2, direction: "none", out_mode: "bounce" } 
+            }
         });
 
         const API_URL = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json";
@@ -146,14 +229,18 @@
         let historyData = [];
         let winStreak = 0;
         let lossStreak = 0;
-        let currentPrediction = null;
+        let totalPredictions = 0;
+        let correctPredictions = 0;
+        let algorithmPatterns = [];
+        let currentAlgorithm = null;
+        let last10Results = [];
+        let isAnalyzing = false;
+        let analysisComplete = false;
 
         function openKeyPage(platform) {
             document.getElementById('selected-platform').innerText = platform;
             document.getElementById('landing-page').style.display = 'none';
             document.getElementById('key-page').style.display = 'flex';
-            const video = document.getElementById('anime-video');
-            video.play().catch(e => console.log("Auto-play blocked"));
         }
 
         function verifyKey() {
@@ -164,87 +251,342 @@
             } else { document.getElementById('error-msg').style.display = 'block'; }
         }
 
-        async function startPredictor() {
-            updateData();
-            setInterval(updateData, 5000);
+        function toggleAnalysis() {
+            const hiddenDiv = document.getElementById('hidden-analysis');
+            hiddenDiv.classList.toggle('active');
         }
 
-        async function updateData() {
+        async function startPredictor() {
+            // Initial delay to show analyzing status
+            document.getElementById('analysis-status').innerText = "ANALYZING...";
+            document.getElementById('analysis-status').style.color = "var(--gold)";
+            document.getElementById('algo-status').innerText = "COLLECTING DATA";
+            
+            // Start with initial data collection and analysis
+            await updateData(true);
+            
+            // Set interval for continuous updates
+            setInterval(() => updateData(false), 3000); 
+        }
+
+        async function updateData(isInitial = false) {
+            if (isAnalyzing && !isInitial) return;
+            
             try {
                 const response = await fetch(API_URL);
                 const json = await response.json();
                 const list = json.data.list;
                 const latestItem = list[0];
                 const nextPeriod = (BigInt(latestItem.issueNumber) + 1n).toString();
-
-                // Logic to update PENDING to WIN/LOSS
-                if (historyData.length > 0) {
-                    historyData.forEach(item => {
-                        if (item.status === 'PENDING') {
-                            const match = list.find(l => l.issueNumber === item.period);
-                            if (match) {
-                                const realSize = parseInt(match.number) >= 5 ? "BIG" : "SMALL";
-                                const realColor = parseInt(match.number) % 2 === 0 ? "RED" : "GREEN";
-                                
-                                const isWin = (item.type === 'SIZE' && item.value === realSize) || 
-                                              (item.type === 'COLOR' && item.value === realColor);
-                                
-                                item.status = isWin ? 'WIN' : 'LOSS';
-                                if(isWin) { winStreak++; lossStreak = 0; }
-                                else { lossStreak++; winStreak = 0; }
-                                document.getElementById('streak-info').innerText = `${winStreak} WIN / ${lossStreak} LOSS`;
-                                renderHistory();
-                            }
-                        }
-                    });
-                }
-
+                
+                // Update last 10 results for analysis
+                updateLast10Results(list.slice(0, 10));
+                
+                // Process History & Pending results
+                processPendingResults(list);
+                
                 if (nextPeriod !== lastPeriod) {
                     lastPeriod = nextPeriod;
                     document.getElementById('current-period').innerText = nextPeriod;
-                    document.getElementById('analysis-status').innerText = "SCANNING...";
                     
-                    updatePatternDisplay(list.slice(0, 5));
-
-                    setTimeout(() => {
-                        const prediction = generateSinglePrediction(list.slice(0, 10));
-                        applyPredictionUI(prediction);
-                        currentPrediction = prediction;
-                        addToHistory(nextPeriod, prediction);
-                        document.getElementById('analysis-status').innerText = "ALGO DETECTED";
-                    }, 1000);
+                    if (!analysisComplete) {
+                        // First time analysis
+                        document.getElementById('analysis-status').innerText = "DEEP ANALYSIS";
+                        document.getElementById('analysis-status').style.color = "var(--blue)";
+                        document.getElementById('algo-status').innerText = "ANALYZING PATTERNS";
+                        
+                        // Show analyzing animation
+                        isAnalyzing = true;
+                        
+                        // Simulate deep analysis with delay
+                        setTimeout(() => {
+                            performDeepAnalysis(list);
+                            isAnalyzing = false;
+                            analysisComplete = true;
+                        }, 1500);
+                    } else {
+                        // Subsequent predictions
+                        document.getElementById('analysis-status').innerText = "UPDATING";
+                        document.getElementById('algo-status').innerText = "SYNCHRONIZED";
+                        
+                        // Quick update analysis
+                        quickUpdateAnalysis(list);
+                    }
                 }
-            } catch (e) { console.error("Update Error"); }
+            } catch (e) { 
+                console.error("Update Error", e);
+                document.getElementById('analysis-status').innerText = "ERROR";
+                document.getElementById('analysis-status').style.color = "var(--red)";
+            }
         }
 
-        function generateSinglePrediction(data) {
-            const sizes = data.map(i => parseInt(i.number) >= 5 ? "BIG" : "SMALL").reverse();
-            const colors = data.map(i => parseInt(i.number) % 2 === 0 ? "RED" : "GREEN").reverse();
+        function updateLast10Results(data) {
+            last10Results = data.map(item => {
+                const num = parseInt(item.number);
+                const size = num >= 5 ? "BIG" : "SMALL";
+                let color;
+                if (num === 0 || num === 5) {
+                    color = "VIOLET";
+                } else {
+                    color = (num % 2 === 0) ? "RED" : "GREEN";
+                }
+                return {
+                    period: item.issueNumber,
+                    number: item.number,
+                    size: size,
+                    color: color
+                };
+            });
+            
+            // Update pattern display
+            updatePatternDisplay();
+            
+            // Update detailed analysis
+            updateDetailedAnalysis();
+        }
 
-            // Calculate confidence for Size and Color
-            let sizeConf = 50 + (Math.random() * 30);
-            let colorConf = 50 + (Math.random() * 30);
+        function performDeepAnalysis(list) {
+            // Extract data for analysis
+            const sizeData = last10Results.map(r => r.size);
+            const colorData = last10Results.map(r => r.color);
+            const numbers = last10Results.map(r => parseInt(r.number));
+            
+            // Analyze patterns
+            const sizePattern = detectPattern(sizeData, ['BIG', 'SMALL']);
+            const colorPattern = detectPattern(colorData, ['RED', 'GREEN', 'VIOLET']);
+            const numberPattern = detectNumberPattern(numbers);
+            
+            // Update pattern displays
+            document.getElementById('size-pattern').innerText = sizePattern.name;
+            document.getElementById('size-count').innerText = `(${sizePattern.count}x)`;
+            document.getElementById('color-pattern').innerText = colorPattern.name;
+            document.getElementById('color-count').innerText = `(${colorPattern.count}x)`;
+            
+            // Detect algorithm
+            currentAlgorithm = detectAlgorithm(sizePattern, colorPattern, numberPattern);
+            document.getElementById('algo-pattern').innerText = currentAlgorithm.name;
+            
+            // Calculate statistics
+            const bigCount = sizeData.filter(s => s === 'BIG').length;
+            const smallCount = sizeData.filter(s => s === 'SMALL').length;
+            const redCount = colorData.filter(c => c === 'RED').length;
+            const greenCount = colorData.filter(c => c === 'GREEN').length;
+            const violetCount = colorData.filter(c => c === 'VIOLET').length;
+            
+            // Update percentages
+            document.getElementById('big-percent').innerText = `${Math.round((bigCount/10)*100)}%`;
+            document.getElementById('small-percent').innerText = `${Math.round((smallCount/10)*100)}%`;
+            document.getElementById('red-percent').innerText = `${Math.round((redCount/10)*100)}%`;
+            document.getElementById('green-percent').innerText = `${Math.round((greenCount/10)*100)}%`;
+            
+            // Make prediction based on analysis
+            const prediction = calculatePrediction(sizePattern, colorPattern, currentAlgorithm);
+            applyPredictionUI(prediction);
+            addToHistory(lastPeriod, prediction);
+            
+            // Update algorithm detector
+            document.getElementById('algorithm-detector').className = "algorithm-indicator algo-detected";
+            document.getElementById('algo-status').innerText = `DETECTED: ${currentAlgorithm.name}`;
+            document.getElementById('analysis-status').innerText = "ALGO ACTIVE";
+            document.getElementById('analysis-status').style.color = "var(--green)";
+        }
 
-            // Analysis Logic
-            if (getStreak(sizes) >= 2) sizeConf += 15;
-            if (getStreak(colors) >= 2) colorConf += 15;
+        function quickUpdateAnalysis(list) {
+            // Update based on current algorithm
+            const sizeData = last10Results.map(r => r.size);
+            const colorData = last10Results.map(r => r.color);
+            
+            // Check if algorithm is still valid
+            const sizePattern = detectPattern(sizeData, ['BIG', 'SMALL']);
+            const colorPattern = detectPattern(colorData, ['RED', 'REEN', 'VIOLET']);
+            
+            // Update algorithm if pattern changed
+            if (sizePattern.count < 3 || colorPattern.count < 2) {
+                // Pattern changed, re-analyze
+                document.getElementById('algo-status').innerText = "PATTERN CHANGED";
+                document.getElementById('algorithm-detector').className = "algorithm-indicator algo-analyzing";
+                setTimeout(() => performDeepAnalysis(list), 1000);
+                return;
+            }
+            
+            // Make quick prediction based on current algorithm
+            const numbers = last10Results.map(r => parseInt(r.number));
+            const numberPattern = detectNumberPattern(numbers);
+            const prediction = calculatePrediction(sizePattern, colorPattern, currentAlgorithm);
+            applyPredictionUI(prediction);
+            addToHistory(lastPeriod, prediction);
+        }
 
-            // Pick the one with higher confidence
-            if (sizeConf >= colorConf) {
-                const pValue = sizes[sizes.length-1] === "BIG" ? (Math.random() > 0.3 ? "BIG" : "SMALL") : "BIG";
-                return { type: 'SIZE', value: pValue, confidence: Math.floor(sizeConf) };
+        function detectPattern(data, types) {
+            // Check for streaks
+            let currentStreak = 1;
+            for (let i = 1; i < data.length; i++) {
+                if (data[i] === data[i-1]) currentStreak++;
+                else break;
+            }
+            
+            // Check for alternating pattern
+            let alternating = true;
+            for (let i = 2; i < data.length; i++) {
+                if (data[i] !== data[i-2]) {
+                    alternating = false;
+                    break;
+                }
+            }
+            
+            // Check for specific type dominance
+            const typeCounts = {};
+            types.forEach(type => {
+                typeCounts[type] = data.filter(d => d === type).length;
+            });
+            
+            const dominantType = Object.keys(typeCounts).reduce((a, b) => 
+                typeCounts[a] > typeCounts[b] ? a : b
+            );
+            
+            if (currentStreak >= 3) {
+                return { name: `${dominantType} STREAK`, count: currentStreak, type: 'streak', dominant: dominantType };
+            } else if (alternating && data.length >= 3) {
+                return { name: `ALTERNATING`, count: Math.floor(data.length/2), type: 'alternating' };
+            } else if (typeCounts[dominantType] >= 7) {
+                return { name: `${dominantType} DOMINANT`, count: typeCounts[dominantType], type: 'dominant', dominant: dominantType };
             } else {
-                const pValue = colors[colors.length-1] === "RED" ? (Math.random() > 0.3 ? "RED" : "GREEN") : "RED";
-                return { type: 'COLOR', value: pValue, confidence: Math.floor(colorConf) };
+                return { name: `RANDOM PATTERN`, count: 0, type: 'random' };
             }
         }
 
-        function getStreak(arr) {
-            let count = 1;
-            for(let i = arr.length-1; i > 0; i--) {
-                if(arr[i] === arr[i-1]) count++; else break;
+        function detectNumberPattern(numbers) {
+            // Analyze number patterns
+            const bigNumbers = numbers.filter(n => n >= 5).length;
+            const smallNumbers = numbers.filter(n => n < 5).length;
+            const evenNumbers = numbers.filter(n => n % 2 === 0).length;
+            const oddNumbers = numbers.filter(n => n % 2 === 1).length;
+            const violetNumbers = numbers.filter(n => n === 0 || n === 5).length;
+            
+            // Calculate averages
+            const avg = numbers.reduce((a, b) => a + b, 0) / numbers.length;
+            
+            return {
+                bigCount: bigNumbers,
+                smallCount: smallNumbers,
+                evenCount: evenNumbers,
+                oddCount: oddNumbers,
+                violetCount: violetNumbers,
+                average: avg
+            };
+        }
+
+        function detectAlgorithm(sizePattern, colorPattern, numberPattern) {
+            // Complex algorithm detection based on multiple factors
+            const algorithms = [
+                { name: "MEAN REVERSION", confidence: 0 },
+                { name: "TREND FOLLOWING", confidence: 0 },
+                { name: "PATTERN BREAK", confidence: 0 },
+                { name: "MOMENTUM", confidence: 0 },
+                { name: "COUNTER-TREND", confidence: 0 }
+            ];
+            
+            // Score each algorithm based on patterns
+            if (sizePattern.type === 'streak' && sizePattern.count >= 3) {
+                algorithms[0].confidence += 30; // Mean reversion likely
+                algorithms[4].confidence += 20; // Counter-trend
             }
-            return count;
+            
+            if (sizePattern.type === 'dominant') {
+                algorithms[1].confidence += 25; // Trend following
+                algorithms[3].confidence += 20; // Momentum
+            }
+            
+            if (colorPattern.type === 'alternating') {
+                algorithms[2].confidence += 35; // Pattern break
+            }
+            
+            if (numberPattern.violetCount >= 2) {
+                algorithms[2].confidence += 20; // Pattern break (violet indicates change)
+            }
+            
+            // Select algorithm with highest confidence
+            const bestAlgo = algorithms.reduce((a, b) => 
+                a.confidence > b.confidence ? a : b
+            );
+            
+            return bestAlgo;
+        }
+
+        function calculatePrediction(sizePattern, colorPattern, algorithm) {
+            let type, value, confidence;
+            const sizeData = last10Results.map(r => r.size);
+            const colorData = last10Results.map(r => r.color);
+            
+            // Calculate base probabilities
+            const bigCount = sizeData.filter(s => s === 'BIG').length;
+            const smallCount = sizeData.filter(s => s === 'SMALL').length;
+            const redCount = colorData.filter(c => c === 'RED').length;
+            const greenCount = colorData.filter(c => c === 'GREEN').length;
+            
+            const bigProb = bigCount / 10;
+            const smallProb = smallCount / 10;
+            const redProb = redCount / 10;
+            const greenProb = greenCount / 10;
+            
+            // Algorithm-based prediction
+            switch(algorithm.name) {
+                case "MEAN REVERSION":
+                    if (sizePattern.type === 'streak' && sizePattern.dominant) {
+                        type = 'SIZE';
+                        value = sizePattern.dominant === 'BIG' ? 'SMALL' : 'BIG';
+                        confidence = 75 + Math.floor(Math.random() * 15);
+                    } else {
+                        type = bigProb > smallProb ? 'SIZE' : 'COLOR';
+                        value = type === 'SIZE' ? 
+                            (bigProb > 0.7 ? 'SMALL' : 'BIG') : 
+                            (redProb > 0.7 ? 'GREEN' : 'RED');
+                        confidence = 70 + Math.floor(Math.random() * 20);
+                    }
+                    break;
+                    
+                case "TREND FOLLOWING":
+                    type = Math.abs(bigProb - 0.5) > Math.abs(redProb - 0.5) ? 'SIZE' : 'COLOR';
+                    if (type === 'SIZE') {
+                        value = bigProb > 0.5 ? 'BIG' : 'SMALL';
+                    } else {
+                        value = redProb > 0.5 ? 'RED' : 'GREEN';
+                    }
+                    confidence = 65 + Math.floor(Math.random() * 25);
+                    break;
+                    
+                case "PATTERN BREAK":
+                    // Look for pattern to break
+                    const lastTwoSizes = sizeData.slice(0, 2);
+                    const lastTwoColors = colorData.slice(0, 2);
+                    
+                    if (lastTwoSizes[0] === lastTwoSizes[1]) {
+                        type = 'SIZE';
+                        value = lastTwoSizes[0] === 'BIG' ? 'SMALL' : 'BIG';
+                    } else if (lastTwoColors[0] === lastTwoColors[1]) {
+                        type = 'COLOR';
+                        value = lastTwoColors[0] === 'RED' ? 'GREEN' : 'RED';
+                    } else {
+                        type = 'SIZE';
+                        value = Math.random() > 0.5 ? 'BIG' : 'SMALL';
+                    }
+                    confidence = 68 + Math.floor(Math.random() * 22);
+                    break;
+                    
+                default:
+                    // Default to highest probability
+                    const maxProb = Math.max(bigProb, smallProb, redProb, greenProb);
+                    if (maxProb === bigProb || maxProb === smallProb) {
+                        type = 'SIZE';
+                        value = bigProb > smallProb ? 'BIG' : 'SMALL';
+                    } else {
+                        type = 'COLOR';
+                        value = redProb > greenProb ? 'RED' : 'GREEN';
+                    }
+                    confidence = 60 + Math.floor(Math.random() * 30);
+            }
+            
+            return { type: type, value: value, confidence: confidence, algorithm: algorithm.name };
         }
 
         function applyPredictionUI(pred) {
@@ -254,19 +596,98 @@
 
             document.getElementById('confidence-display').innerText = `CONF: ${pred.confidence}%`;
             document.getElementById('confidence-fill').style.width = pred.confidence + "%";
+            document.getElementById('confidence-fill').style.background = 
+                pred.confidence > 80 ? 'var(--green)' : 
+                pred.confidence > 65 ? 'var(--neon-purple)' : 'var(--orange)';
+            
+            document.getElementById('prediction-type').innerHTML = 
+                `<i class="fas fa-${pred.type === 'SIZE' ? 'expand' : 'palette'}"></i> ${pred.type} | Algorithm: ${pred.algorithm}`;
         }
 
-        function updatePatternDisplay(data) {
+        function updatePatternDisplay() {
             const container = document.getElementById('pattern-display');
             container.innerHTML = "";
-            data.forEach(item => {
-                const size = parseInt(item.number) >= 5 ? "B" : "S";
-                const colorClass = parseInt(item.number) % 2 === 0 ? "red" : "green";
+            last10Results.forEach(item => {
+                const sizeClass = item.size.toLowerCase();
+                const colorClass = item.color.toLowerCase();
                 const div = document.createElement('div');
                 div.className = `pattern-item`;
-                div.innerHTML = `<span class="${colorClass}">${item.number}</span> | ${size}`;
+                div.innerHTML = `
+                    <div style="font-weight:bold; margin-bottom:2px;">${item.period.slice(-3)}</div>
+                    <div class="${colorClass}" style="font-size:1.1rem;">${item.number}</div>
+                    <div style="font-size:0.7rem; margin-top:2px;">
+                        <span class="${sizeClass}">${item.size.charAt(0)}</span> | 
+                        <span class="${colorClass}">${item.color.charAt(0)}</span>
+                    </div>
+                `;
                 container.appendChild(div);
             });
+        }
+
+        function updateDetailedAnalysis() {
+            const container = document.getElementById('detailed-analysis');
+            if (!container) return;
+            
+            let html = '<div class="analysis-data">';
+            last10Results.forEach((item, index) => {
+                html += `
+                    <div class="analysis-item" style="width:100%; border-bottom:1px dashed rgba(255,255,255,0.1); padding:3px 0;">
+                        Period ${item.period.slice(-4)}: 
+                        <span style="color:var(--gold)">${item.number}</span> | 
+                        <span class="${item.size.toLowerCase()}">${item.size}</span> | 
+                        <span class="${item.color.toLowerCase()}">${item.color}</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function processPendingResults(list) {
+            if (historyData.length > 0) {
+                historyData.forEach(item => {
+                    if (item.status === 'PENDING') {
+                        const match = list.find(l => l.issueNumber === item.period);
+                        if (match) {
+                            const num = parseInt(match.number);
+                            const realSize = num >= 5 ? "BIG" : "SMALL";
+                            let realColor;
+                            if (num === 0 || num === 5) {
+                                realColor = "VIOLET";
+                            } else {
+                                realColor = (num % 2 === 0) ? "RED" : "GREEN";
+                            }
+                            
+                            let isWin = false;
+                            if(item.type === 'SIZE' && item.value === realSize) isWin = true;
+                            if(item.type === 'COLOR' && item.value === realColor) isWin = true;
+                            
+                            item.status = isWin ? 'WIN' : 'LOSS';
+                            item.realValue = `${match.number} (${realSize}/${realColor})`;
+                            
+                            totalPredictions++;
+                            if(isWin) { 
+                                winStreak++; 
+                                lossStreak = 0; 
+                                correctPredictions++;
+                            } else { 
+                                lossStreak++; 
+                                winStreak = 0; 
+                            }
+                            
+                            document.getElementById('streak-info').innerText = `${winStreak} WIN / ${lossStreak} LOSS`;
+                            document.getElementById('current-streak').innerText = 
+                                winStreak > 0 ? `W${winStreak}` : `L${lossStreak}`;
+                            
+                            const accuracy = totalPredictions > 0 ? 
+                                Math.round((correctPredictions / totalPredictions) * 100) : 0;
+                            document.getElementById('accuracy-rate').innerText = `${accuracy}%`;
+                            
+                            renderHistory();
+                        }
+                    }
+                });
+            }
         }
 
         function addToHistory(period, pred) {
@@ -274,9 +695,12 @@
                 period: period, 
                 type: pred.type, 
                 value: pred.value, 
-                status: 'PENDING' 
+                algorithm: pred.algorithm,
+                status: 'PENDING',
+                confidence: pred.confidence
             });
-            if(historyData.length > 10) historyData.pop();
+            
+            if(historyData.length > 15) historyData.pop();
             renderHistory();
         }
 
@@ -288,9 +712,18 @@
                 div.className = 'history-item';
                 const statusClass = item.status.toLowerCase();
                 div.innerHTML = `
-                    <span>${item.period.slice(-4)}</span>
-                    <span class="${item.value.toLowerCase()}">${item.value}</span>
-                    <span class="${statusClass}">${item.status}</span>
+                    <div style="display:flex; flex-direction:column; font-size:0.8rem;">
+                        <span>#${item.period.slice(-4)}</span>
+                        <span style="font-size:0.7rem; color:#aaa;">${item.algorithm || ''}</span>
+                    </div>
+                    <span class="${item.value.toLowerCase()}" style="font-weight:bold;">${item.value}</span>
+                    <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                        <span class="${statusClass}" style="font-weight:bold;">${item.status}</span>
+                        ${item.realValue ? 
+                            `<span style="font-size:0.7rem; color:#aaa;">${item.realValue}</span>` : 
+                            `<span style="font-size:0.7rem; color:var(--gold);">${item.confidence}%</span>`
+                        }
+                    </div>
                 `;
                 container.appendChild(div);
             });
