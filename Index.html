@@ -161,11 +161,28 @@
             text-transform: uppercase;
         }
 
+        /* UPDATED: Prediction Page with back.png background */
         #prediction-page {
             display: none;
             min-height: 100vh;
-            background: rgba(0,0,0,0.9);
+            background-image: url('back.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             padding: 20px;
+            position: relative;
+        }
+
+        /* Overlay to ensure readability over background image */
+        #prediction-page::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 0;
         }
 
         .app-container {
@@ -174,9 +191,10 @@
             border: 3px solid var(--neon-purple);
             border-radius: 30px;
             padding: 20px;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.8);
             min-height: 90vh;
             position: relative;
+            z-index: 1;
         }
 
         .app-header {
@@ -319,16 +337,15 @@
         let lastPeriod = "";
         let historyData = [];
 
-        // UPDATE: Jab user platform click karega, tabhi video aur audio trigger hoga
         function openKeyPage(platform) {
             document.getElementById('selected-platform').innerText = platform;
             document.getElementById('landing-page').style.display = 'none';
             document.getElementById('key-page').style.display = 'flex';
             
+            // Trigger audio and video immediately on user click
             const video = document.getElementById('anime-video');
-            video.muted = false; // Audio on
-            video.play().catch(error => {
-                console.log("Autoplay blocked, trying muted first");
+            video.muted = false;
+            video.play().catch(e => {
                 video.muted = true;
                 video.play();
             });
