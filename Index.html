@@ -285,7 +285,7 @@
 
     <section id="key-page">
         <div class="video-box">
-            <video id="anime-video" width="100%" height="100%" loop autoplay playsinline>
+            <video id="anime-video" width="100%" height="100%" loop playsinline>
                 <source src="anime.mp4" type="video/mp4">
             </video>
         </div>
@@ -319,30 +319,26 @@
         let lastPeriod = "";
         let historyData = [];
 
+        // UPDATE: Jab user platform click karega, tabhi video aur audio trigger hoga
         function openKeyPage(platform) {
             document.getElementById('selected-platform').innerText = platform;
             document.getElementById('landing-page').style.display = 'none';
             document.getElementById('key-page').style.display = 'flex';
             
-            // Video plays initially muted to bypass browser block
             const video = document.getElementById('anime-video');
-            video.muted = true;
-            video.play();
+            video.muted = false; // Audio on
+            video.play().catch(error => {
+                console.log("Autoplay blocked, trying muted first");
+                video.muted = true;
+                video.play();
+            });
         }
 
         function verifyKey() {
-            const video = document.getElementById('anime-video');
             if(document.getElementById('key-input').value === "mickey456") {
-                // Video unmuted and restarted with audio on interaction
-                video.muted = false;
-                video.currentTime = 0;
-                video.play();
-                
-                setTimeout(() => {
-                    document.getElementById('key-page').style.display = 'none';
-                    document.getElementById('prediction-page').style.display = 'block';
-                    startPredictor();
-                }, 1000); // Small delay to let audio start
+                document.getElementById('key-page').style.display = 'none';
+                document.getElementById('prediction-page').style.display = 'block';
+                startPredictor();
             } else { 
                 document.getElementById('error-msg').style.display = 'block'; 
             }
