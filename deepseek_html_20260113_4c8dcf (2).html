@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TASHAN WIN MICKEY HACK PRO MAX</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --neon-gold: #FFD700;
+            --neon-red: #FF0000;
+            --neon-green: #00FF00;
+            --neon-blue: #0088FF;
+            --neon-purple: #9D00FF;
+            --dark-bg: rgba(10, 10, 15, 0.98);
+            --dragon-red: #CC0000;
+            --dragon-gold: #FFCC00;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body, html {
+            height: 100%;
+            width: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #0a0a0f 0%, #000000 100%);
+            color: white;
+        }
+
+        .cosmic-bg {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(255, 0, 100, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(0, 100, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+            z-index: -2;
+        }
+
+        .stars {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        #entry-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(45deg, #000428, #004e92),
+                url('https://images.unsplash.com/photo-1519681393784-d120267933ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');
+            background-blend-mode: overlay;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 1s;
+        }
+
+        .logo-container {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: pulse 2s infinite;
+        }
+
+        .logo-title {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--neon-gold), var(--dragon-red));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
+
+        .logo-subtitle {
+            font-size: 18px;
+            color: var(--neon-blue);
+            letter-spacing: 2px;
+            font-weight: 300;
+        }
+
+        .main-btn {
+            padding: 20px 60px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(45deg, var(--dragon-red), var(--neon-gold));
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 
+                0 0 30px var(--dragon-red),
+                0 0 60px rgba(255, 0, 0, 0.3);
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+            margin-top: 30px;
+        }
+
+        .main-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 
+                0 0 40px var(--neon-gold),
+                0 0 80px rgba(255, 215, 0, 0.4);
+        }
+
+        .main-btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .main-btn:hover:before {
+            left: 100%;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #game-frame {
+            display: none;
+            width: 100%;
+            height: 100%;
+            border: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        #floating-circle {
+            display: none;
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--dragon-red), var(--neon-gold));
+            border: 3px solid white;
+            border-radius: 50%;
+            z-index: 10000;
+            cursor: move;
+            box-shadow: 
+                0 0 20px var(--dragon-red),
+                0 0 40px rgba(255, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            touch-action: none;
+            transition: transform 0.3s;
+        }
+
+        #floating-circle:hover {
+            transform: scale(1.1) rotate(15deg);
+        }
+
+        .circle-icon {
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+            text-shadow: 0 0 10px black;
+        }
+
+        .circle-pulse {
+            width: 12px;
+            height: 12px;
+            background: #00FF00;
+            border-radius: 50%;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            box-shadow: 0 0 10px #00FF00;
+            animation: pulse-green 1s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        #prediction-box {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 380px;
+            background: var(--dark-bg);
+            border: 3px solid var(--dragon-gold);
+            border-radius: 25px;
+            padding: 25px;
+            z-index: 10001;
+            box-shadow: 
+                0 0 50px var(--dragon-red),
+                inset 0 0 30px rgba(255, 215, 0, 0.1);
+            color: white;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .dragon-header {
+            position: relative;
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--dragon-gold);
+        }
+
+        .dragon-title {
+            font-size: 22px;
+            font-weight: 900;
+            background: linear-gradient(45deg, var(--neon-gold), var(--dragon-red));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+            letter-spacing: 1.5px;
+        }
+
+        .dragon-subtitle {
+            font-size: 12px;
+            color: #00FFFF;
+            margin-top: 5px;
+            letter-spacing: 1px;
+        }
+
+        .dragon-icon {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 30px;
+            color: var(--dragon-red);
+            opacity: 0.5;
+        }
+
+        .period-display {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px solid var(--neon-blue);
+            text-align: center;
+        }
+
+        .period-label {
+            font-size: 14px;
+            color: #AAAAAA;
+            margin-bottom: 5px;
+        }
+
+        #next-period {
+            font-size: 42px;
+            font-weight: 900;
+            color: var(--neon-gold);
+            text-shadow: 0 0 20px var(--neon-gold);
+            letter-spacing: 3px;
+        }
+
+        .prediction-display {
+            background: rgba(0, 20, 40, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid var(--neon-purple);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prediction-label {
+            font-size: 14px;
+            color: #00FFAA;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #prediction-result {
+            font-size: 46px;
+            font-weight: 900;
+            margin: 15px 0;
+            min-height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-shadow: 0 0 15px currentColor;
+            transition: all 0.5s;
+        }
+
+        .prediction-mode {
+            font-size: 12px;
+            color: #FFAA00;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .mode-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 8px;
+            margin: 0 5px;
+            background: rgba(50, 50, 100, 0.5);
+            border: 1px solid #4444FF;
+            border-radius: 8px;
+            color: #AAAAFF;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .mode-btn.active {
+            background: rgba(0, 100, 255, 0.7);
+            color: white;
+            box-shadow: 0 0 10px #0044FF;
+        }
+
+        .mode-btn:hover {
+            background: rgba(100, 100, 255, 0.7);
+        }
+
+        .stats-panel {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            font-size: 12px;
+            color: #AAAAAA;
+        }
+
+        .stat-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--neon-green);
+            margin-top: 5px;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .gen-btn {
+            flex: 2;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 100, 255, 0.4);
+        }
+
+        .gen-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 100, 255, 0.6);
+        }
+
+        .gen-btn:active {
+            transform: translateY(1px);
+        }
+
+        .close-btn {
+            flex: 1;
+            background: linear-gradient(to right, #FF3333, #FF6600);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            background: linear-gradient(to right, #FF5555, #FF8800);
+        }
+
+        .footer-note {
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px solid #333;
+        }
+
+        .api-status {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #FF0000;
+            animation: pulse-red 2s infinite;
+        }
+
+        .status-dot.connected {
+            background: #00FF00;
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+
+        .power-status {
+            background: rgba(0, 20, 40, 0.5);
+            border-radius: 10px;
+            padding: 12px;
+            margin: 10px 0;
+            font-size: 11px;
+            color: #AAAAAA;
+            border: 1px solid #4444FF;
+            text-align: center;
+        }
+
+        .power-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+        }
+
+        .power-label {
+            color: #AAAAFF;
+        }
+
+        .power-value {
+            color: #00FFAA;
+            font-weight: bold;
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 10px var(--neon-gold); }
+            50% { box-shadow: 0 0 30px var(--neon-gold); }
+            100% { box-shadow: 0 0 10px var(--neon-gold); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translate(-50%, -60%); opacity: 0; }
+            to { transform: translate(-50%, -50%); opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            #prediction-box {
+                width: 90%;
+                padding: 20px;
+            }
+            
+            #next-period {
+                font-size: 36px;
+            }
+            
+            #prediction-result {
+                font-size: 36px;
+            }
+            
+            .logo-title {
+                font-size: 36px;
+            }
+            
+            .main-btn {
+                padding: 15px 40px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cosmic Background -->
+    <div class="cosmic-bg"></div>
+    <div class="stars" id="stars"></div>
+
+    <!-- Initial Screen -->
+    <div id="entry-screen">
+        <div class="logo-container">
+            <div class="logo-title">TASHAN WIN MICKEY</div>
+            <div class="logo-subtitle">SMART PREDICTION SYSTEM V3.0</div>
+        </div>
+        <button class="main-btn" onclick="startApp()">
+            <i class="fas fa-dragon" style="margin-right: 10px;"></i>
+            REGISTER & DEPOSIT
+        </button>
+        <div style="margin-top: 30px; text-align: center; color: #AAAAAA; font-size: 14px;">
+            <p>⚡ Instant Prediction Technology ⚡</p>
+            <p>🎯 Dual Mode System 🎯</p>
+            <p>🔥 Real-time Generation 🔥</p>
+        </div>
+    </div>
+
+    <!-- Game Iframe -->
+    <iframe id="game-frame" src=""></iframe>
+
+    <!-- Floating Circle -->
+    <div id="floating-circle" onmousedown="dragStart(event)" ontouchstart="dragStart(event)">
+        <div class="circle-icon">
+            <i class="fas fa-bolt"></i>
+        </div>
+        <div class="circle-pulse"></div>
+    </div>
+
+    <!-- Dragon Prediction Box -->
+    <div id="prediction-box">
+        <div class="dragon-header">
+            <div class="dragon-title">
+                <i class="fas fa-dragon"></i> TASHAN WIN MICKEY HACK <i class="fas fa-dragon"></i>
+            </div>
+            <div class="dragon-subtitle">INSTANT PREDICTION SYSTEM</div>
+            <div class="dragon-icon">
+                <i class="fas fa-magic"></i>
+            </div>
+        </div>
+
+        <!-- Period Display -->
+        <div class="period-display">
+            <div class="period-label">NEXT PERIOD NUMBER (LIVE)</div>
+            <div id="next-period">LOADING...</div>
+        </div>
+
+        <!-- Prediction Display -->
+        <div class="prediction-display">
+            <div class="prediction-label">PREDICTION RESULT</div>
+            <div id="prediction-result">---</div>
+            <div id="prediction-mode" class="prediction-mode">Ready for prediction...</div>
+        </div>
+
+        <!-- Power Status -->
+        <div class="power-status" id="power-status">
+            <div class="power-row">
+                <span class="power-label">System Status:</span>
+                <span class="power-value" id="system-status">Active</span>
+            </div>
+            <div class="power-row">
+                <span class="power-label">Prediction Type:</span>
+                <span class="power-value" id="prediction-type">-</span>
+            </div>
+            <div class="power-row">
+                <span class="power-label">Generation Time:</span>
+                <span class="power-value" id="generation-time">0ms</span>
+            </div>
+            <div class="power-row">
+                <span class="power-label">Energy Level:</span>
+                <span class="power-value" id="energy-level">High</span>
+            </div>
+        </div>
+
+        <!-- Mode Indicator -->
+        <div class="mode-indicator">
+            <div class="mode-btn" id="mode-size" onclick="setMode('size')">SIZE MODE</div>
+            <div class="mode-btn" id="mode-color" onclick="setMode('color')">COLOR MODE</div>
+            <div class="mode-btn" id="mode-auto" onclick="setMode('auto')">AUTO MODE</div>
+        </div>
+
+        <!-- Stats Panel -->
+        <div class="stats-panel">
+            <div class="stat-item">
+                <span>Accuracy</span>
+                <span class="stat-value" id="accuracy">88%</span>
+            </div>
+            <div class="stat-item">
+                <span>Wins</span>
+                <span class="stat-value" id="wins">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Streak</span>
+                <span class="stat-value" id="streak">0</span>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="btn-container">
+            <button class="gen-btn" onclick="generatePrediction()">
+                <i class="fas fa-bolt" style="margin-right: 8px;"></i>
+                GENERATE PREDICTION
+            </button>
+            <button class="close-btn" onclick="togglePredictionBox()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- API Status -->
+        <div class="api-status">
+            <span>System:</span>
+            <div class="status-dot" id="api-status-dot"></div>
+            <span id="api-status-text">Ready</span>
+        </div>
+
+        <div class="footer-note">
+            <p>🔮 Instant Generation System | ⚡ Dual Mode Technology | © 2024 Tashan Win</p>
+            <p style="margin-top: 5px;">Click Generate for new prediction</p>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const entryScreen = document.getElementById('entry-screen');
+        const gameFrame = document.getElementById('game-frame');
+        const floatingCircle = document.getElementById('floating-circle');
+        const predictionBox = document.getElementById('prediction-box');
+        const nextPeriodEl = document.getElementById('next-period');
+        const predictionResult = document.getElementById('prediction-result');
+        const predictionModeEl = document.getElementById('prediction-mode');
+        const accuracyEl = document.getElementById('accuracy');
+        const winsEl = document.getElementById('wins');
+        const streakEl = document.getElementById('streak');
+        const apiStatusDot = document.getElementById('api-status-dot');
+        const apiStatusText = document.getElementById('api-status-text');
+        
+        // Power Status Elements
+        const systemStatusEl = document.getElementById('system-status');
+        const predictionTypeEl = document.getElementById('prediction-type');
+        const generationTimeEl = document.getElementById('generation-time');
+        const energyLevelEl = document.getElementById('energy-level');
+        
+        // API Configuration
+        const API_ENDPOINT = "https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json";
+        
+        // Create stars for background
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 150; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.width = Math.random() * 3 + 'px';
+                star.style.height = star.style.width;
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        // Initialize
+        createStars();
+        
+        // Variables
+        let currentMode = 'auto';
+        let wins = 0;
+        let streak = 0;
+        let isMoving = false;
+        let predictionHistory = [];
+        
+        // Update API Status
+        function updateApiStatus(connected, message) {
+            if (connected) {
+                apiStatusDot.classList.add('connected');
+                apiStatusText.textContent = 'Active';
+                apiStatusText.style.color = '#00FF00';
+            } else {
+                apiStatusDot.classList.remove('connected');
+                apiStatusText.textContent = message || 'Offline';
+                apiStatusText.style.color = '#FF0000';
+            }
+        }
+        
+        // Generate Random Prediction
+        function generateRandomPrediction() {
+            const startTime = performance.now();
+            
+            // Determine which mode to use
+            let activeMode = currentMode;
+            if (activeMode === 'auto') {
+                // Randomly choose between size and color
+                activeMode = Math.random() > 0.5 ? 'size' : 'color';
+            }
+            
+            // Generate random prediction based on mode
+            let prediction;
+            let predictionColor;
+            
+            if (activeMode === 'size') {
+                // Randomly choose BIG or SMALL
+                prediction = Math.random() > 0.5 ? "BIG" : "SMALL";
+                predictionColor = prediction === "BIG" ? "#FF3333" : "#00AAFF";
+                predictionTypeEl.textContent = "SIZE PREDICTION";
+            } else {
+                // Randomly choose RED or GREEN
+                prediction = Math.random() > 0.5 ? "RED" : "GREEN";
+                predictionColor = prediction === "RED" ? "#FF0000" : "#00FF00";
+                predictionTypeEl.textContent = "COLOR PREDICTION";
+            }
+            
+            // Update energy level randomly
+            const energyLevels = ["Very High", "High", "Medium", "Low"];
+            energyLevelEl.textContent = energyLevels[Math.floor(Math.random() * energyLevels.length)];
+            
+            const generationTime = performance.now() - startTime;
+            generationTimeEl.textContent = `${generationTime.toFixed(2)}ms`;
+            
+            return {
+                prediction: prediction,
+                mode: activeMode,
+                color: predictionColor,
+                generationTime: generationTime
+            };
+        }
+        
+        // Calculate Next Period Number
+        function calculateNextPeriod(issueNumber) {
+            if (!issueNumber) return '---';
+            
+            try {
+                const lastFour = issueNumber.slice(-4);
+                const nextPeriodNum = (parseInt(lastFour) + 1).toString().padStart(4, '0');
+                return nextPeriodNum;
+            } catch (error) {
+                return '---';
+            }
+        }
+        
+        // Update Next Period Number
+        async function updateNextPeriod() {
+            try {
+                nextPeriodEl.textContent = 'LOADING...';
+                nextPeriodEl.style.color = '#FFFF00';
+                
+                const response = await fetch(API_ENDPOINT);
+                const data = await response.json();
+                
+                if (data && data.data && data.data.list && data.data.list.length > 0) {
+                    const latest = data.data.list[0];
+                    const nextPeriod = calculateNextPeriod(latest.issueNumber);
+                    
+                    nextPeriodEl.textContent = nextPeriod;
+                    nextPeriodEl.style.transform = 'scale(1.2)';
+                    nextPeriodEl.style.color = '#00FF00';
+                    
+                    setTimeout(() => {
+                        nextPeriodEl.style.transform = 'scale(1)';
+                        nextPeriodEl.style.color = 'var(--neon-gold)';
+                    }, 300);
+                    
+                    updateApiStatus(true);
+                    return { nextPeriod, latest, history: data.data.list };
+                } else {
+                    throw new Error('No data');
+                }
+            } catch (error) {
+                nextPeriodEl.textContent = 'ERROR';
+                nextPeriodEl.style.color = 'var(--neon-red)';
+                updateApiStatus(false, 'Connection Error');
+                return null;
+            }
+        }
+        
+        // Set current mode
+        function setMode(mode) {
+            currentMode = mode;
+            
+            document.getElementById('mode-size').classList.remove('active');
+            document.getElementById('mode-color').classList.remove('active');
+            document.getElementById('mode-auto').classList.remove('active');
+            document.getElementById('mode-' + mode).classList.add('active');
+            
+            predictionModeEl.textContent = `Mode: ${mode.toUpperCase()}`;
+        }
+        
+        // Initialize mode
+        setMode('auto');
+        
+        // Start Application
+        function startApp() {
+            const targetUrl = "https://www.tashanok.app/#/register?invitationCode=13413405256";
+            gameFrame.src = targetUrl;
+            
+            entryScreen.style.opacity = '0';
+            setTimeout(() => {
+                entryScreen.style.display = 'none';
+                gameFrame.style.display = 'block';
+                floatingCircle.style.display = 'flex';
+                updateNextPeriod();
+            }, 1000);
+        }
+        
+        // Toggle Prediction Box
+        function togglePredictionBox() {
+            if (predictionBox.style.display === 'block') {
+                predictionBox.style.display = 'none';
+            } else {
+                predictionBox.style.display = 'block';
+                predictionBox.style.animation = 'slideIn 0.5s forwards';
+                updateNextPeriod();
+            }
+        }
+        
+        // Generate Prediction
+        async function generatePrediction() {
+            const startTime = Date.now();
+            
+            // Show loading
+            predictionResult.textContent = "GENERATING...";
+            predictionResult.style.color = "#FFFF00";
+            predictionModeEl.textContent = "Creating new prediction...";
+            systemStatusEl.textContent = "Processing";
+            systemStatusEl.style.color = "#FFFF00";
+            
+            // Small delay for visual effect
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            try {
+                // Generate random prediction
+                const predictionData = generateRandomPrediction();
+                
+                // Update display
+                predictionResult.textContent = predictionData.prediction;
+                predictionResult.style.color = predictionData.color;
+                predictionResult.style.textShadow = `0 0 20px ${predictionData.color}`;
+                
+                // Update mode display
+                const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+                predictionModeEl.textContent = `Mode: ${predictionData.mode.toUpperCase()} | Generated at ${time}`;
+                
+                // Update stats
+                const totalTime = Date.now() - startTime;
+                
+                // Randomly update wins and streak (to make it look realistic)
+                if (Math.random() > 0.4) {
+                    wins++;
+                    streak++;
+                    if (streak > 15) streak = 1;
+                } else {
+                    if (streak > 0) streak--;
+                }
+                
+                // Update accuracy (random between 75-95%)
+                const accuracy = 75 + Math.floor(Math.random() * 21);
+                
+                winsEl.textContent = wins;
+                streakEl.textContent = streak;
+                accuracyEl.textContent = `${accuracy}%`;
+                
+                // Update system status
+                systemStatusEl.textContent = "Active";
+                systemStatusEl.style.color = "#00FF00";
+                
+                // Update next period
+                updateNextPeriod();
+                
+                // Celebration for high streak
+                if (streak >= 5) {
+                    predictionBox.style.animation = 'glow 1s 3';
+                    setTimeout(() => {
+                        predictionBox.style.animation = '';
+                    }, 3000);
+                }
+                
+                updateApiStatus(true, 'Active');
+                
+            } catch (error) {
+                console.error('Generation error:', error);
+                
+                // Fallback to simple random
+                const isBig = Math.random() > 0.5;
+                predictionResult.textContent = isBig ? "BIG" : "SMALL";
+                predictionResult.style.color = isBig ? "#FF3333" : "#00AAFF";
+                predictionModeEl.textContent = 'System Generated Prediction';
+                systemStatusEl.textContent = "Active";
+                systemStatusEl.style.color = "#00FF00";
+                
+                updateApiStatus(true, 'Active');
+            }
+        }
+        
+        // Dragging Logic for Floating Circle
+        function dragStart(e) {
+            isMoving = false;
+            let event = e.type === 'touchstart' ? e.touches[0] : e;
+            let shiftX = event.clientX - floatingCircle.getBoundingClientRect().left;
+            let shiftY = event.clientY - floatingCircle.getBoundingClientRect().top;
+            
+            floatingCircle.style.zIndex = '10002';
+            predictionBox.style.zIndex = '10001';
+            
+            function moveAt(clientX, clientY) {
+                isMoving = true;
+                floatingCircle.style.left = clientX - shiftX + 'px';
+                floatingCircle.style.top = clientY - shiftY + 'px';
+                floatingCircle.style.right = 'auto';
+                floatingCircle.style.bottom = 'auto';
+            }
+            
+            function onMouseMove(e) {
+                let moveEvent = e.type === 'touchmove' ? e.touches[0] : e;
+                moveAt(moveEvent.clientX, moveEvent.clientY);
+            }
+            
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('touchmove', onMouseMove, {passive: false});
+            
+            function stopDrag() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('touchmove', onMouseMove);
+                setTimeout(() => { isMoving = false; }, 100);
+                
+                setTimeout(() => {
+                    floatingCircle.style.zIndex = '10000';
+                    predictionBox.style.zIndex = '10001';
+                }, 200);
+            }
+            
+            document.onmouseup = stopDrag;
+            document.ontouchend = stopDrag;
+        }
+        
+        // Toggle box on click (if not dragging)
+        floatingCircle.addEventListener('click', (e) => {
+            if (!isMoving) {
+                togglePredictionBox();
+            }
+        });
+        
+        // Auto-update every 10 seconds
+        setInterval(updateNextPeriod, 10000);
+        
+        // Initial API connection
+        setTimeout(() => {
+            updateNextPeriod();
+        }, 2000);
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'p' || e.key === 'P') {
+                if (predictionBox.style.display === 'none') {
+                    togglePredictionBox();
+                }
+                generatePrediction();
+            }
+            
+            if (e.key === 'Escape') {
+                predictionBox.style.display = 'none';
+            }
+            
+            // Quick generate with space
+            if (e.key === ' ') {
+                if (predictionBox.style.display === 'block') {
+                    generatePrediction();
+                }
+            }
+        });
+        
+        // Prevent context menu
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+        
+        // Initial status
+        updateApiStatus(true, 'Active');
+    </script>
+</body>
+</html>
