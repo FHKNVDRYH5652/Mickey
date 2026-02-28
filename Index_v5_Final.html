@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mickey X Web — Ultra Pro Predictor v5.0</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --P:#bc13fe;--PG:#d670ff;--BG:#050505;--CB:rgba(15,0,35,.85);
+  --G:#00ff88;--R:#ff3355;--GOLD:#ffd700;--B:#00d4ff;
+  --OR:#ff9900;--V:#9d00ff;--T:#00ffcc;--PK:#ff00aa;
+  --glass:rgba(255,255,255,.04);--border:rgba(188,19,254,.35);
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Rajdhani',sans-serif;-webkit-user-select:none;user-select:none;}
+html,body{background:var(--BG);color:#fff;overflow-x:hidden;min-height:100vh;}
+#pg{position:fixed;width:100%;height:100%;z-index:-2;}
+
+/* ═══════════════════════════════════════════
+   GLOBAL SCROLLBAR
+═══════════════════════════════════════════ */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--P);border-radius:2px;}
+::-webkit-scrollbar-track{background:rgba(0,0,0,.3);}
+
+/* ═══════════════════════════════════════════
+   MATRIX RAIN CANVAS
+═══════════════════════════════════════════ */
+#matrix-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;opacity:.07;pointer-events:none;}
+
+/* ═══════════════════════════════════════════
+   SHARED UTILITIES
+═══════════════════════════════════════════ */
+.page{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:relative;}
+.back-btn{position:absolute;top:20px;left:20px;color:var(--P);cursor:pointer;font-size:1.4rem;z-index:10;background:rgba(188,19,254,.15);width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--P);transition:.3s;}
+.back-btn:hover{background:rgba(188,19,254,.35);box-shadow:0 0 15px var(--P);}
+.glow-btn{background:linear-gradient(45deg,var(--P),#7700cc);color:#fff;border:none;padding:14px 28px;border-radius:10px;font-weight:700;cursor:pointer;transition:.3s;font-size:1rem;letter-spacing:.5px;}
+.glow-btn:hover{box-shadow:0 0 25px var(--P);transform:translateY(-2px);}
+.neon-border{border:1.5px solid var(--P);border-radius:16px;background:var(--CB);}
+
+/* ═══════════════════════════════════════════
+   LANDING PAGE
+═══════════════════════════════════════════ */
+#landing-page{display:flex;}
+
+/* Top hero banner */
+.hero-banner{text-align:center;margin-bottom:30px;position:relative;}
+.hero-logo{font-family:'Orbitron',sans-serif;font-size:2rem;color:var(--P);text-shadow:0 0 20px var(--P),0 0 60px rgba(188,19,254,.4);letter-spacing:2px;}
+.hero-sub{font-size:.85rem;color:#888;margin-top:4px;letter-spacing:1px;}
+.hero-version{display:inline-block;background:linear-gradient(45deg,var(--P),var(--T));color:#000;font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:8px;letter-spacing:1px;}
+
+/* Live stats strip */
+.live-strip{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:24px;}
+.ls-card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 18px;text-align:center;min-width:90px;}
+.ls-val{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;}
+.ls-lbl{font-size:.6rem;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+
+/* Platform scroller */
+.p-scroll-wrap{width:100%;max-width:1100px;position:relative;}
+.p-scroll-title{font-size:.75rem;color:#666;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-left:8px;}
+.p-scroller{display:flex;overflow-x:auto;gap:16px;padding:10px 8px 20px;scroll-behavior:smooth;scrollbar-width:none;}
+.p-scroller::-webkit-scrollbar{display:none;}
+.p-card{flex:0 0 200px;height:300px;border-radius:20px;position:relative;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:.35s;background:rgba(20,0,40,.6);}
+.p-card::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(0,0,0,.9) 100%);z-index:1;transition:.3s;}
+.p-card:hover{transform:translateY(-8px) scale(1.03);border-color:var(--P);box-shadow:0 15px 40px rgba(188,19,254,.35);}
+.p-card:hover::before{background:linear-gradient(180deg,transparent 30%,rgba(0,0,0,.95) 100%);}
+.p-card img{width:100%;height:100%;object-fit:cover;}
+.p-card-label{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:12px;text-align:center;}
+.p-card-name{font-weight:700;font-size:1rem;text-shadow:0 0 10px #000;}
+.p-card-badge{display:inline-block;background:linear-gradient(45deg,var(--G),var(--T));color:#000;font-size:.55rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:3px;letter-spacing:.5px;}
+/* Winning ribbon */
+.p-card-ribbon{position:absolute;top:12px;right:-28px;background:var(--GOLD);color:#000;font-size:.6rem;font-weight:700;padding:4px 35px;transform:rotate(40deg);z-index:3;letter-spacing:.5px;}
+
+/* Recent wins ticker */
+.wins-ticker{width:100%;max-width:1100px;background:rgba(0,0,0,.5);border:1px solid rgba(0,255,136,.2);border-radius:10px;padding:8px 16px;margin-top:16px;overflow:hidden;display:flex;align-items:center;gap:10px;}
+.ticker-label{color:var(--G);font-size:.7rem;font-weight:700;white-space:nowrap;}
+.ticker-content{font-size:.72rem;color:#aaa;white-space:nowrap;animation:ticker-scroll 22s linear infinite;}
+@keyframes ticker-scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+
+/* ═══════════════════════════════════════════
+   TARGET PAGE
+═══════════════════════════════════════════ */
+#target-page{padding-top:70px;}
+.page-title{font-family:'Orbitron',sans-serif;font-size:1.6rem;color:var(--P);text-shadow:0 0 12px var(--P);margin-bottom:8px;text-align:center;}
+.page-subtitle{font-size:.8rem;color:#666;text-align:center;margin-bottom:28px;letter-spacing:.5px;}
+.target-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;width:100%;max-width:960px;padding:0 10px;}
+.t-card{background:linear-gradient(135deg,rgba(20,0,50,.9),rgba(50,0,100,.8));border:1.5px solid rgba(188,19,254,.3);border-radius:18px;padding:22px;text-align:center;transition:.3s;cursor:pointer;position:relative;overflow:hidden;}
+.t-card::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(188,19,254,.05) 0%,transparent 60%);opacity:0;transition:.4s;}
+.t-card:hover{border-color:var(--GOLD);box-shadow:0 8px 30px rgba(255,215,0,.2);transform:translateY(-4px);}
+.t-card:hover::after{opacity:1;}
+.t-range{font-size:1.3rem;font-weight:700;color:var(--GOLD);margin-bottom:6px;text-shadow:0 0 8px rgba(255,215,0,.5);}
+.t-profit{font-size:.75rem;color:var(--G);margin-bottom:8px;}
+.t-price{font-size:1.6rem;font-weight:900;color:var(--P);margin:10px 0;}
+.t-desc{font-size:.8rem;color:#777;margin-bottom:16px;}
+.t-features{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:14px;}
+.t-feat{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.2);color:var(--G);font-size:.6rem;padding:3px 8px;border-radius:8px;}
+.t-select{background:linear-gradient(45deg,var(--P),#7700cc);color:#fff;border:none;padding:11px 22px;border-radius:8px;font-weight:700;cursor:pointer;width:100%;transition:.3s;font-size:.95rem;}
+.t-select:hover{box-shadow:0 0 20px var(--P);}
+.t-popular{position:absolute;top:0;right:0;background:linear-gradient(45deg,var(--OR),#ff6600);color:#fff;font-size:.6rem;font-weight:700;padding:5px 12px;border-radius:0 18px 0 12px;letter-spacing:.5px;}
+
+/* ═══════════════════════════════════════════
+   ADDONS PAGE
+═══════════════════════════════════════════ */
+.addons-wrap{background:var(--CB);border:1.5px solid var(--border);border-radius:24px;padding:28px;max-width:480px;width:92%;}
+.ao-title{color:var(--GOLD);font-family:'Orbitron',sans-serif;font-size:1.5rem;margin-bottom:6px;text-align:center;}
+.ao-sub{font-size:.75rem;color:#666;text-align:center;margin-bottom:20px;}
+.ao-target-chip{background:rgba(188,19,254,.15);border:1px solid var(--P);border-radius:10px;padding:10px;text-align:center;margin-bottom:18px;}
+.ao-target-chip span{font-size:1.2rem;color:var(--GOLD);font-weight:700;}
+.ao-item{background:linear-gradient(135deg,rgba(30,0,60,.8),rgba(60,0,120,.7));border:1.5px solid rgba(0,255,204,.3);border-radius:14px;padding:18px;margin-bottom:14px;transition:.3s;}
+.ao-item.active{border-color:var(--GOLD);background:linear-gradient(135deg,rgba(50,0,100,.9),rgba(80,0,160,.8));}
+.ao-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.ao-name{font-weight:700;font-size:1.05rem;color:var(--T);}
+.ao-price{font-size:1.2rem;font-weight:700;color:var(--GOLD);}
+.ao-desc{font-size:.8rem;color:#999;margin-bottom:10px;}
+.ao-points{display:flex;flex-direction:column;gap:3px;margin-bottom:12px;}
+.ao-point{font-size:.78rem;color:var(--G);}
+.ao-btns{display:flex;gap:8px;}
+.ao-add{background:linear-gradient(45deg,var(--T),#00aacc);color:#000;border:none;padding:8px 18px;border-radius:7px;font-weight:700;cursor:pointer;flex:1;transition:.3s;}
+.ao-add.on{background:linear-gradient(45deg,var(--R),#cc0033);}
+.ao-skip{background:transparent;color:#555;border:1px solid #333;padding:8px 14px;border-radius:7px;font-weight:700;cursor:pointer;transition:.3s;font-size:.8rem;}
+.ao-skip:hover{border-color:#666;color:#888;}
+.ao-total{background:rgba(0,0,0,.5);border:1.5px solid var(--GOLD);border-radius:12px;padding:16px;text-align:center;margin:16px 0;}
+.ao-total-label{font-size:.8rem;color:#888;}
+.ao-total-val{font-size:1.8rem;font-weight:700;color:var(--G);margin-top:4px;}
+.ao-proceed{background:linear-gradient(45deg,var(--P),#7700cc);color:#fff;border:none;padding:14px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;font-size:1rem;letter-spacing:.5px;transition:.3s;}
+.ao-proceed:hover{box-shadow:0 0 25px var(--P);}
+
+/* ═══════════════════════════════════════════
+   PAYMENT PAGE
+═══════════════════════════════════════════ */
+.pay-wrap{background:var(--CB);border:1.5px solid var(--border);border-radius:24px;padding:28px;max-width:480px;width:92%;text-align:center;}
+.pay-title{color:var(--GOLD);font-family:'Orbitron',sans-serif;font-size:1.5rem;margin-bottom:4px;}
+.pay-sub{font-size:.75rem;color:#666;margin-bottom:20px;}
+.pay-secure-badges{display:flex;gap:8px;justify-content:center;margin-bottom:16px;flex-wrap:wrap;}
+.sec-badge{background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);color:var(--G);font-size:.62rem;padding:4px 10px;border-radius:8px;display:flex;align-items:center;gap:4px;}
+.pay-summary{background:rgba(0,0,0,.4);border:1px solid rgba(188,19,254,.2);border-radius:12px;padding:14px;margin-bottom:16px;text-align:left;}
+.pay-sum-row{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;}
+.pay-sum-row:last-child{border-top:1px solid rgba(255,255,255,.08);padding-top:8px;margin-top:4px;font-weight:700;font-size:.95rem;}
+.qr-box{background:#fff;padding:16px;border-radius:14px;display:inline-block;margin:16px 0;box-shadow:0 0 30px rgba(188,19,254,.3);}
+.qr-box img{width:180px;height:180px;display:block;}
+.pay-amount-big{font-family:'Orbitron',sans-serif;font-size:2rem;color:var(--G);font-weight:700;margin:8px 0;text-shadow:0 0 15px var(--G);}
+.pay-instructions{background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:12px;font-size:.8rem;text-align:left;margin-bottom:14px;}
+.pay-instr-step{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;color:#bbb;}
+.pay-instr-step .step-num{background:var(--P);color:#fff;font-size:.65rem;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+/* Pending approval timer */
+.approval-box{display:none;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);border-radius:12px;padding:16px;margin:12px 0;text-align:center;}
+.approval-box.show{display:block;}
+.approval-spinner{font-size:2rem;animation:spin 2s linear infinite;display:block;margin-bottom:8px;}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.approval-timer{font-family:'Orbitron',sans-serif;font-size:1.4rem;color:var(--B);font-weight:700;}
+.approval-msg{font-size:.78rem;color:#888;margin-top:4px;}
+.utr-input{width:100%;padding:14px;margin:12px 0;background:rgba(255,255,255,.06);border:1.5px solid rgba(188,19,254,.4);color:#fff;border-radius:10px;text-align:center;font-size:1rem;outline:none;transition:.3s;}
+.utr-input:focus{border-color:var(--P);box-shadow:0 0 15px rgba(188,19,254,.25);}
+.utr-input::placeholder{color:#555;}
+.pay-submit{background:linear-gradient(45deg,#00cc55,#009933);color:#fff;border:none;padding:14px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;margin:6px 0;font-size:1rem;transition:.3s;letter-spacing:.5px;}
+.pay-submit:hover{box-shadow:0 0 25px #00cc55;}
+.pay-support{background:linear-gradient(45deg,#229954,#1a7a42);color:#fff;border:none;padding:12px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;margin:4px 0;display:flex;align-items:center;justify-content:center;gap:8px;font-size:.9rem;transition:.3s;}
+.pay-support:hover{box-shadow:0 0 20px rgba(34,153,84,.5);}
+.pay-note{font-size:.72rem;color:#555;margin-top:12px;}
+
+/* ═══════════════════════════════════════════
+   PREDICTION PAGE
+═══════════════════════════════════════════ */
+#prediction-page{display:none;min-height:100vh;padding:16px;}
+.app-wrap{max-width:480px;margin:0 auto;border:2px solid var(--P);border-radius:28px;padding:18px;background:rgba(0,0,0,.96);min-height:90vh;position:relative;box-shadow:0 0 30px rgba(188,19,254,.3);}
+
+/* Topbar */
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.tb-home{color:var(--P);cursor:pointer;font-size:1.2rem;background:rgba(188,19,254,.12);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--P);}
+.tb-home:hover{background:rgba(188,19,254,.3);}
+.tb-live{display:flex;align-items:center;gap:5px;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--G);animation:ldot 1s infinite;}
+@keyframes ldot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+.live-lbl{color:var(--G);font-size:.75rem;font-weight:700;}
+.tb-sound{color:var(--P);cursor:pointer;background:rgba(188,19,254,.12);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--P);font-size:.9rem;}
+
+/* Target header */
+.tgt-header{background:linear-gradient(90deg,#5500aa,#bc13fe,#5500aa);background-size:200%;animation:glow-bg 3s infinite linear;border-radius:14px;padding:14px;text-align:center;margin-bottom:14px;border:1.5px solid var(--GOLD);}
+@keyframes glow-bg{0%{background-position:0%}100%{background-position:200%}}
+.tgt-goal{font-size:1.2rem;font-weight:700;}
+.tgt-badges{display:flex;gap:8px;justify-content:center;margin-top:8px;}
+.tbadge{padding:3px 10px;border-radius:10px;font-size:.65rem;font-weight:700;}
+.tbadge-acc{background:var(--T);color:#000;}
+.tbadge-ins{background:var(--PK);color:#fff;}
+
+/* Stats */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.st-box{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:10px 5px;text-align:center;}
+.st-val{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;}
+.st-lbl{font-size:.6rem;color:#666;margin-top:2px;text-transform:uppercase;letter-spacing:.3px;}
+
+/* Countdown */
+.cd-box{background:linear-gradient(135deg,rgba(0,15,35,.9),rgba(0,30,60,.9));border:1.5px solid var(--B);border-radius:14px;padding:10px;text-align:center;margin-bottom:12px;}
+.cd-lbl{font-size:.7rem;color:var(--B);margin-bottom:2px;letter-spacing:.5px;}
+.cd-val{font-family:'Orbitron',sans-serif;font-size:1.7rem;color:var(--GOLD);font-weight:700;letter-spacing:5px;text-shadow:0 0 10px var(--GOLD);}
+.cd-val.urgent{color:var(--R);text-shadow:0 0 10px var(--R);animation:urg .5s infinite;}
+@keyframes urg{0%,100%{opacity:1}50%{opacity:.4}}
+.cd-period{font-size:.65rem;color:#555;margin-top:2px;}
+
+/* Mini results */
+.mr-wrap{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px;margin-bottom:10px;}
+.mr-lbl{font-size:.65rem;color:#555;margin-bottom:6px;letter-spacing:.5px;}
+.mr-chips{display:flex;gap:4px;flex-wrap:wrap;}
+.mr-chip{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;}
+.mr-chip.r{background:rgba(255,51,85,.2);color:#ff3355;border:1px solid #ff3355;}
+.mr-chip.g{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid #00ff88;}
+.mr-chip.v{background:rgba(157,0,255,.2);color:#bb44ff;border:1px solid #9d00ff;}
+
+/* ═══ MANIPULATION DETECTOR ═══ */
+.manip-panel{background:linear-gradient(135deg,rgba(0,5,20,.95),rgba(0,10,30,.95));border:1.5px solid rgba(0,212,255,.3);border-radius:15px;padding:14px;margin-bottom:10px;}
+.manip-title{font-size:.78rem;color:var(--B);font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.manip-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.m-card{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:8px;}
+.m-card.highlight{border-color:var(--OR) !important;background:rgba(255,153,0,.07);}
+.m-card.danger{border-color:var(--R) !important;background:rgba(255,51,85,.07);}
+.mc-label{font-size:.6rem;color:#555;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
+.mc-val{font-size:.82rem;font-weight:700;}
+.mc-tag{display:inline-block;font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:8px;margin-top:3px;}
+.mc-tag.safe{background:rgba(0,255,136,.15);color:var(--G);}
+.mc-tag.warn{background:rgba(255,153,0,.15);color:var(--OR);animation:tw 1s infinite;}
+.mc-tag.crit{background:rgba(255,51,85,.15);color:var(--R);animation:tw .5s infinite;}
+@keyframes tw{0%,100%{opacity:1}50%{opacity:.3}}
+.manip-alert{background:rgba(255,153,0,.08);border:1px solid rgba(255,153,0,.25);border-radius:8px;padding:8px;font-size:.7rem;color:#aaa;}
+.manip-alert strong{color:var(--OR);}
+
+/* ═══ PROBABILITY BARS ═══ */
+.prob-panel{background:rgba(0,0,0,.5);border:1px solid rgba(188,19,254,.2);border-radius:12px;padding:12px;margin-bottom:10px;}
+.prob-title{font-size:.75rem;color:var(--P);font-weight:700;margin-bottom:10px;}
+.pb-row{display:flex;align-items:center;margin-bottom:7px;}
+.pb-lbl{font-size:.75rem;min-width:58px;font-weight:600;}
+.pb-wrap{flex:1;height:10px;background:rgba(255,255,255,.05);border-radius:5px;overflow:hidden;margin:0 8px;position:relative;}
+.pb-fill{height:100%;border-radius:5px;transition:width .8s ease;}
+.pb-fill.r{background:linear-gradient(90deg,#990022,#ff3355);}
+.pb-fill.g{background:linear-gradient(90deg,#006633,#00ff88);}
+.pb-fill.v{background:linear-gradient(90deg,#440088,#aa00ff);}
+.pb-fill.b{background:linear-gradient(90deg,#886600,#ffd700);}
+.pb-fill.s{background:linear-gradient(90deg,#003399,#00aaff);}
+.pb-pct{font-size:.72rem;font-weight:700;min-width:36px;text-align:right;}
+.pb-crown{font-size:.75rem;margin-left:3px;}
+
+/* ═══ PREDICTION BOX ═══ */
+.pred-main{background:var(--glass);border:2px solid var(--P);border-radius:18px;padding:22px;text-align:center;margin-bottom:10px;position:relative;overflow:hidden;}
+.pred-main::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(188,19,254,.1) 0%,transparent 70%);pointer-events:none;}
+.pred-tag{font-size:.78rem;color:#666;margin-bottom:4px;letter-spacing:.5px;}
+.pred-val{font-size:3.5rem;font-weight:900;font-family:'Orbitron',sans-serif;text-transform:uppercase;margin:6px 0;line-height:1;}
+@keyframes pf{0%{transform:scale(.7);opacity:0;filter:blur(8px)}70%{transform:scale(1.08);opacity:1;filter:blur(0)}100%{transform:scale(1)}}
+.pred-flash{animation:pf .5s ease forwards;}
+.pred-type{color:var(--P);font-size:1rem;margin-bottom:10px;font-weight:600;}
+
+/* ═══ CONFIDENCE ═══ */
+.conf-box{background:rgba(0,0,0,.4);border:1px solid rgba(188,19,254,.2);border-radius:10px;padding:10px;margin:8px 0;}
+.conf-lbl{font-size:.72rem;color:#555;text-align:center;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.conf-track{background:rgba(255,255,255,.05);border-radius:10px;height:12px;overflow:hidden;}
+.conf-bar{height:100%;border-radius:10px;transition:width .9s ease;}
+.conf-text{text-align:center;font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;margin-top:5px;}
+
+/* ═══ STREAK ═══ */
+.streak-bar{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.3);border-radius:8px;padding:7px 12px;margin:6px 0;border:1px solid rgba(255,255,255,.04);}
+.streak-t{font-size:.82rem;font-weight:700;}
+.streak-t.w{color:var(--G);}
+.streak-t.l{color:var(--R);}
+
+/* ═══ BET/LEVEL ═══ */
+.bet-display{font-size:1.4rem;color:var(--GOLD);font-weight:700;margin:10px 0;text-align:center;}
+.levels-row{display:flex;gap:8px;margin:8px 0;}
+.lv{flex:1;padding:10px 6px;border-radius:10px;text-align:center;background:rgba(0,0,0,.4);border:1px solid rgba(188,19,254,.2);transition:.3s;}
+.lv.active{border-color:var(--GOLD);background:rgba(255,215,0,.08);box-shadow:0 0 10px rgba(255,215,0,.15);}
+.lv-n{font-size:1rem;font-weight:700;}
+.lv-p{font-size:.75rem;color:#666;}
+.lv-a{font-size:.95rem;color:var(--G);font-weight:700;margin-top:2px;}
+
+/* ═══ HOT/COLD ═══ */
+.hc-panel{background:rgba(0,0,0,.4);border:1px solid rgba(188,19,254,.15);border-radius:10px;padding:10px;margin:8px 0;}
+.hc-title{font-size:.72rem;color:var(--P);font-weight:700;margin-bottom:7px;}
+.hc-chips{display:flex;gap:5px;flex-wrap:wrap;}
+.hc-chip{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;border:2px solid;}
+.hc-chip.hot{background:rgba(255,51,85,.15);border-color:#ff3355;color:#ff3355;}
+.hc-chip.cold{background:rgba(0,100,255,.15);border-color:#0066ff;color:#66aaff;}
+.hc-chip.norm{background:rgba(255,255,255,.03);border-color:#333;color:#555;}
+
+/* ═══ AI ANALYSIS LOG ═══ */
+.ai-log{background:rgba(0,0,0,.5);border:1px solid rgba(0,212,255,.15);border-radius:10px;padding:10px;margin:8px 0;max-height:100px;overflow-y:auto;}
+.ai-log-title{font-size:.68rem;color:var(--B);font-weight:700;margin-bottom:5px;}
+.ai-log-entry{font-size:.68rem;color:#888;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;gap:6px;}
+.ai-log-entry .ai-icon{color:var(--P);flex-shrink:0;}
+
+/* ═══ HISTORY ═══ */
+.hist-panel{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:12px;max-height:280px;overflow-y:auto;}
+.hist-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.hist-title{color:var(--P);font-weight:700;font-size:.85rem;}
+.hist-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin-bottom:5px;background:rgba(0,0,0,.3);border-radius:7px;border-left:3px solid var(--P);}
+.hist-item.wi{border-left-color:var(--G);background:rgba(0,255,136,.04);}
+.hist-item.lo{border-left-color:var(--R);background:rgba(255,51,85,.04);}
+.hist-item.pe{border-left-color:var(--GOLD);}
+
+/* Text colors */
+.cr{color:var(--R);} .cg{color:var(--G);} .cb{color:var(--GOLD);} .cs{color:var(--B);} .cv{color:#bb44ff;}
+
+/* POPUPS */
+.popup{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;justify-content:center;align-items:center;}
+.popup-box{background:rgba(5,0,15,.97);padding:36px;border-radius:24px;text-align:center;max-width:480px;width:90%;border:2px solid;animation:pop .4s ease;}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+.popup-s{border-color:var(--G);box-shadow:0 0 50px rgba(0,255,136,.2);}
+.popup-f{border-color:var(--R);box-shadow:0 0 50px rgba(255,51,85,.2);}
+.popup-title{font-family:'Orbitron',sans-serif;font-size:1.8rem;margin-bottom:16px;}
+.popup-s .popup-title{color:var(--G);}
+.popup-f .popup-title{color:var(--R);}
+.popup-msg{font-size:1rem;margin:16px 0;color:#ccc;line-height:1.6;}
+.popup-btn{background:linear-gradient(45deg,var(--P),#7700cc);color:#fff;border:none;padding:14px 36px;border-radius:10px;font-weight:700;cursor:pointer;font-size:1rem;margin-top:12px;transition:.3s;}
+.popup-btn:hover{box-shadow:0 0 25px var(--P);}
+</style>
+</head>
+<body>
+<canvas id="matrix-canvas"></canvas>
+<div id="pg"></div>
+
+<!-- ══════════════════════ POPUPS ══════════════════════ -->
+<div id="popup-win" class="popup">
+  <div class="popup-box popup-s">
+    <div class="popup-title">🏆 TARGET HIT!</div>
+    <div class="popup-msg">
+      <p>Congratulations! You reached your target successfully.</p>
+      <p style="color:var(--GOLD);font-size:1.3rem;margin-top:12px;">₹<span id="win-amount">0</span> Achieved!</p>
+      <div id="ins-refund-msg" style="display:none;color:var(--PK);margin-top:8px;font-size:.85rem;"><i class="fas fa-shield-alt"></i> Insurance unused — valid for next target!</div>
+    </div>
+    <button class="popup-btn" onclick="goHome()">BUY NEW TARGET</button>
+  </div>
+</div>
+<div id="popup-lose" class="popup">
+  <div class="popup-box popup-f">
+    <div class="popup-title" id="lose-title">TARGET LOST!</div>
+    <div class="popup-msg" id="lose-msg"></div>
+    <button class="popup-btn" onclick="goHome()" id="lose-btn">TRY AGAIN</button>
+  </div>
+</div>
+
+<!-- ══════════════════════ LANDING ══════════════════════ -->
+<section class="page" id="landing-page" style="display:flex;">
+  <div class="hero-banner">
+    <div class="hero-logo"><i class="fas fa-bolt" style="margin-right:8px;"></i>MICKEY X WEB</div>
+    <div class="hero-sub">ULTRA PRO PREDICTOR — AI POWERED</div>
+    <div class="hero-version">v5.0 MANIPULATION DETECTOR</div>
+  </div>
+
+  <div class="live-strip">
+    <div class="ls-card">
+      <div class="ls-val" id="live-users" style="color:var(--G);">---</div>
+      <div class="ls-lbl">Live Users</div>
+    </div>
+    <div class="ls-card">
+      <div class="ls-val" id="live-wins" style="color:var(--GOLD);">---</div>
+      <div class="ls-lbl">Wins Today</div>
+    </div>
+    <div class="ls-card">
+      <div class="ls-val" style="color:var(--T);">87%</div>
+      <div class="ls-lbl">Accuracy</div>
+    </div>
+    <div class="ls-card">
+      <div class="ls-val" style="color:var(--P);">24/7</div>
+      <div class="ls-lbl">Live Support</div>
+    </div>
+  </div>
+
+  <div class="p-scroll-wrap">
+    <div class="p-scroll-title"><i class="fas fa-gamepad" style="margin-right:6px;color:var(--P);"></i>SELECT YOUR PLATFORM</div>
+    <div class="p-scroller">
+      <div class="p-card" onclick="openTarget('TASHAN')">
+        <div class="p-card-ribbon">HOT</div>
+        <img src="tashan.png" alt="TASHAN">
+        <div class="p-card-label">
+          <div class="p-card-name">TASHAN</div>
+          <div class="p-card-badge">✓ SUPPORTED</div>
+        </div>
+      </div>
+      <div class="p-card" onclick="openTarget('DM WIN')">
+        <img src="dmwin.png" alt="DM WIN">
+        <div class="p-card-label">
+          <div class="p-card-name">DM WIN</div>
+          <div class="p-card-badge">✓ SUPPORTED</div>
+        </div>
+      </div>
+      <div class="p-card" onclick="openTarget('DAMAN')">
+        <div class="p-card-ribbon">TOP</div>
+        <img src="daman.png" alt="DAMAN">
+        <div class="p-card-label">
+          <div class="p-card-name">DAMAN</div>
+          <div class="p-card-badge">✓ SUPPORTED</div>
+        </div>
+      </div>
+      <div class="p-card" onclick="openTarget('JALWA')">
+        <img src="jalwa.png" alt="JALWA">
+        <div class="p-card-label">
+          <div class="p-card-name">JALWA</div>
+          <div class="p-card-badge">✓ SUPPORTED</div>
+        </div>
+      </div>
+      <div class="p-card" onclick="openTarget('82 LOTTERY')">
+        <img src="82lottery.png" alt="82 LOTTERY">
+        <div class="p-card-label">
+          <div class="p-card-name">82 LOTTERY</div>
+          <div class="p-card-badge">✓ SUPPORTED</div>
+        </div>
+      </div>
+      <div class="p-card" onclick="openTarget('BDG GAME')">
+        <img src="bdggame.png" alt="BDG GAME">
+        <div class="p-card-label">
+          <div class="p-card-name">BDG GAME</div>
+          <div class="p-card-badge">✓ SUPPORTED</div>
+        </div>
+      </div>
+      <div class="p-card" onclick="openTarget('GOA GAME')">
+        <img src="goagame.png" alt="GOA GAME">
+        <div class="p-card-label">
+          <div class="p-card-name">GOA GAME</div>
+          <div class="p-card-badge">✓ SUPPORTED</div>
+        </div>
+      </div>
+      <div class="p-card" onclick="openTarget('91 CLUB')">
+        <div class="p-card-ribbon">NEW</div>
+        <img src="91club.png" alt="91 CLUB">
+        <div class="p-card-label">
+          <div class="p-card-name">91 CLUB</div>
+          <div class="p-card-badge">✓ SUPPORTED</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wins-ticker">
+    <span class="ticker-label">🏆 RECENT WINS:</span>
+    <span class="ticker-content" id="ticker-text">Loading recent wins...</span>
+  </div>
+</section>
+
+<!-- ══════════════════════ TARGET PAGE ══════════════════════ -->
+<section class="page" id="target-page">
+  <div class="back-btn" onclick="goTo('landing-page')"><i class="fas fa-arrow-left"></i></div>
+  <div class="page-title">CHOOSE TARGET</div>
+  <div class="page-subtitle">Select your starting balance → profit goal</div>
+  <div class="target-grid">
+    <div class="t-card" onclick="selectTarget('350-1500',250)">
+      <div class="t-range">₹350 → ₹1,500</div>
+      <div class="t-profit">Profit: ₹1,150 (329%)</div>
+      <div class="t-price">₹250</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">Beginner</span></div>
+      <div class="t-desc">Perfect for beginners. Low risk, steady profits.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+    <div class="t-card" onclick="selectTarget('500-3500',500)" style="border-color:rgba(255,215,0,.4);">
+      <div class="t-popular">POPULAR</div>
+      <div class="t-range">₹500 → ₹3,500</div>
+      <div class="t-profit">Profit: ₹3,000 (600%)</div>
+      <div class="t-price">₹500</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">Standard</span></div>
+      <div class="t-desc">Most popular choice. Great ROI in short time.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+    <div class="t-card" onclick="selectTarget('1000-10000',999)">
+      <div class="t-range">₹1,000 → ₹10,000</div>
+      <div class="t-profit">Profit: ₹9,000 (900%)</div>
+      <div class="t-price">₹999</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">Advanced</span></div>
+      <div class="t-desc">10x your investment with advanced AI.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+    <div class="t-card" onclick="selectTarget('2500-25000',1500)">
+      <div class="t-range">₹2,500 → ₹25,000</div>
+      <div class="t-profit">Profit: ₹22,500 (900%)</div>
+      <div class="t-price">₹1,500</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">Pro</span></div>
+      <div class="t-desc">For serious players. Big profits guaranteed.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+    <div class="t-card" onclick="selectTarget('5000-50000',2500)">
+      <div class="t-range">₹5,000 → ₹50,000</div>
+      <div class="t-profit">Profit: ₹45,000 (900%)</div>
+      <div class="t-price">₹2,500</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">Expert</span></div>
+      <div class="t-desc">Expert level. Maximum earning potential.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+    <div class="t-card" onclick="selectTarget('1000-35000',5000)" style="border-color:rgba(188,19,254,.5);">
+      <div class="t-popular" style="background:linear-gradient(45deg,var(--P),#7700cc);">VIP</div>
+      <div class="t-range">₹1,000 → ₹35,000</div>
+      <div class="t-profit">Profit: ₹34,000 (3400%)</div>
+      <div class="t-price">₹5,000</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">VIP Access</span></div>
+      <div class="t-desc">VIP plan. Explosive growth with AI guidance.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+    <div class="t-card" onclick="selectTarget('2000-70000',10000)" style="border-color:rgba(255,215,0,.5);">
+      <div class="t-popular" style="background:linear-gradient(45deg,var(--GOLD),#cc8800);color:#000;">ELITE</div>
+      <div class="t-range">₹2,000 → ₹70,000</div>
+      <div class="t-profit">Profit: ₹68,000 (3400%)</div>
+      <div class="t-price">₹10,000</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">Elite</span></div>
+      <div class="t-desc">Elite plan for maximum wealth creation.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ ADDONS PAGE ══════════════════════ -->
+<section class="page" id="addons-page">
+  <div class="back-btn" onclick="goTo('target-page')"><i class="fas fa-arrow-left"></i></div>
+  <div class="addons-wrap">
+    <div class="ao-title">ADD-ONS</div>
+    <div class="ao-sub">Boost your winning chances</div>
+    <div class="ao-target-chip">Selected: <span id="ao-target-name">--</span></div>
+    <div class="ao-item" id="ao-acc-item">
+      <div class="ao-head">
+        <div class="ao-name"><i class="fas fa-bolt" style="color:var(--GOLD);margin-right:5px;"></i>90% ACCURACY BOOSTER</div>
+        <div class="ao-price" id="ao-acc-price">₹50</div>
+      </div>
+      <div class="ao-desc">Activates enhanced AI pattern scanning mode.</div>
+      <div class="ao-points">
+        <div class="ao-point"><i class="fas fa-check-circle" style="margin-right:5px;"></i>90% Prediction Accuracy</div>
+        <div class="ao-point"><i class="fas fa-check-circle" style="margin-right:5px;"></i>Deep Manipulation Analysis</div>
+        <div class="ao-point"><i class="fas fa-check-circle" style="margin-right:5px;"></i>Smart Bet Optimization</div>
+      </div>
+      <div class="ao-btns">
+        <button class="ao-skip" onclick="skipAddon('acc')">SKIP</button>
+        <button class="ao-add" id="ao-acc-btn" onclick="toggleAddon('acc')"><i class="fas fa-plus"></i> ADD</button>
+      </div>
+    </div>
+    <div class="ao-item" id="ao-ins-item">
+      <div class="ao-head">
+        <div class="ao-name"><i class="fas fa-shield-alt" style="color:var(--PK);margin-right:5px;"></i>LOSS INSURANCE</div>
+        <div class="ao-price" id="ao-ins-price">₹100</div>
+      </div>
+      <div class="ao-desc">Full money-back protection if target is missed.</div>
+      <div class="ao-points">
+        <div class="ao-point"><i class="fas fa-shield-alt" style="margin-right:5px;color:var(--PK);"></i>Full Deposit Refund</div>
+        <div class="ao-point"><i class="fas fa-shield-alt" style="margin-right:5px;color:var(--PK);"></i>Target Price Refund</div>
+        <div class="ao-point"><i class="fas fa-shield-alt" style="margin-right:5px;color:var(--PK);"></i>100% Money Back</div>
+      </div>
+      <div class="ao-btns">
+        <button class="ao-skip" onclick="skipAddon('ins')">SKIP</button>
+        <button class="ao-add" id="ao-ins-btn" onclick="toggleAddon('ins')"><i class="fas fa-plus"></i> ADD</button>
+      </div>
+    </div>
+    <div class="ao-total">
+      <div class="ao-total-label">TOTAL PAYABLE</div>
+      <div class="ao-total-val" id="ao-total">₹250</div>
+    </div>
+    <button class="ao-proceed" onclick="showPayment()"><i class="fas fa-lock" style="margin-right:8px;"></i>PROCEED TO PAYMENT</button>
+    <div style="font-size:.72rem;color:#555;margin-top:12px;text-align:center;"><i class="fas fa-info-circle"></i> Add-ons are optional</div>
+  </div>
+</section>
+
+<!-- ══════════════════════ PAYMENT PAGE ══════════════════════ -->
+<section class="page" id="payment-page">
+  <div class="back-btn" onclick="goTo('addons-page')"><i class="fas fa-arrow-left"></i></div>
+  <div class="pay-wrap">
+    <div class="pay-title">COMPLETE PAYMENT</div>
+    <div class="pay-sub">Secure payment via UPI</div>
+    <div class="pay-secure-badges">
+      <div class="sec-badge"><i class="fas fa-lock"></i> 100% Secure</div>
+      <div class="sec-badge"><i class="fas fa-bolt"></i> Instant Activation</div>
+      <div class="sec-badge"><i class="fas fa-shield-alt"></i> Verified</div>
+    </div>
+    <div class="pay-summary" id="pay-summary">
+      <div class="pay-sum-row"><span style="color:#888;">Target Plan</span><span id="ps-target" style="color:var(--GOLD);">--</span></div>
+      <div class="pay-sum-row" id="ps-acc-row" style="display:none;"><span style="color:#888;">Accuracy Booster</span><span id="ps-acc" style="color:var(--T);">--</span></div>
+      <div class="pay-sum-row" id="ps-ins-row" style="display:none;"><span style="color:#888;">Loss Insurance</span><span id="ps-ins" style="color:var(--PK);">--</span></div>
+      <div class="pay-sum-row"><span style="color:#fff;font-weight:700;">TOTAL</span><span id="ps-total" style="color:var(--G);font-weight:700;">--</span></div>
+    </div>
+    <div class="qr-box"><img src="qr.png" alt="QR Code" style="display:block;"></div>
+    <div class="pay-amount-big" id="pay-amt-big">Pay ₹250</div>
+    <div class="pay-instructions">
+      <div class="pay-instr-step"><div class="step-num">1</div><span>Open any UPI app (PhonePe, GPay, Paytm)</span></div>
+      <div class="pay-instr-step"><div class="step-num">2</div><span>Scan QR code and pay <strong id="pay-amt-inline" style="color:var(--GOLD);">₹250</strong> exact</span></div>
+      <div class="pay-instr-step"><div class="step-num">3</div><span>Copy the UTR/Transaction ID</span></div>
+      <div class="pay-instr-step"><div class="step-num">4</div><span>Paste below and submit</span></div>
+    </div>
+    <input type="text" class="utr-input" id="utr-inp" placeholder="Enter UTR / Transaction ID" maxlength="25">
+    <button class="pay-submit" onclick="submitPay()"><i class="fas fa-check-circle" style="margin-right:8px;"></i>SUBMIT & VERIFY</button>
+    <div class="approval-box" id="approval-box">
+      <span class="approval-spinner">⏳</span>
+      <div class="approval-timer" id="approval-cd">04:59</div>
+      <div class="approval-msg">Admin is verifying your payment...</div>
+    </div>
+    <button class="pay-support" onclick="openSupport()"><i class="fab fa-telegram" style="font-size:1.1rem;"></i> Contact Support</button>
+    <div class="pay-note"><i class="fas fa-info-circle"></i> Manual verification takes 2–5 minutes. Contact support if delayed.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════ PREDICTION PAGE ══════════════════════ -->
+<section id="prediction-page">
+  <div class="app-wrap">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="tb-home" onclick="goHome()"><i class="fas fa-home"></i></div>
+      <div class="tb-live"><span class="live-dot"></span><span class="live-lbl">LIVE AI</span></div>
+      <div class="tb-sound" onclick="toggleSound()"><i id="sound-ico" class="fas fa-volume-up"></i></div>
+    </div>
+
+    <!-- Target Header -->
+    <div class="tgt-header">
+      <div class="tgt-goal" id="tgt-goal">Target: 350 → 1500</div>
+      <div class="tgt-badges" id="tgt-badges"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="st-box"><div class="st-val" id="st-bal" style="color:var(--G);">₹0</div><div class="st-lbl">Balance</div></div>
+      <div class="st-box"><div class="st-val" id="st-wr" style="color:var(--GOLD);">--%</div><div class="st-lbl">Win Rate</div></div>
+      <div class="st-box"><div class="st-val" id="st-pg" style="color:var(--T);">0%</div><div class="st-lbl">Progress</div></div>
+    </div>
+
+    <!-- Countdown -->
+    <div class="cd-box">
+      <div class="cd-lbl"><i class="fas fa-clock"></i> NEXT PERIOD IN</div>
+      <div class="cd-val" id="cd-val">00:00</div>
+      <div class="cd-period">Period: <span id="cur-period" style="color:var(--GOLD);font-family:'Orbitron',sans-serif;font-size:.8rem;">LOADING…</span></div>
+    </div>
+
+    <!-- Mini Results -->
+    <div class="mr-wrap">
+      <div class="mr-lbl"><i class="fas fa-history"></i> LAST 10 RESULTS</div>
+      <div class="mr-chips" id="mr-chips"></div>
+    </div>
+
+    <!-- Manipulation Detector -->
+    <div class="manip-panel">
+      <div class="manip-title"><i class="fas fa-eye"></i> WINGO MANIPULATION DETECTOR</div>
+      <div class="manip-grid">
+        <div class="m-card" id="mc-pattern">
+          <div class="mc-label">Current Pattern</div>
+          <div class="mc-val" id="mc-pattern-v" style="color:var(--T);">SCANNING…</div>
+          <div class="mc-tag safe" id="mc-pattern-t">ANALYZING</div>
+        </div>
+        <div class="m-card" id="mc-manip">
+          <div class="mc-label">Manipulation Type</div>
+          <div class="mc-val" id="mc-manip-v" style="color:var(--OR);">DETECTING…</div>
+          <div class="mc-tag safe" id="mc-manip-t">CHECKING</div>
+        </div>
+        <div class="m-card" id="mc-trap">
+          <div class="mc-label">Trap Probability</div>
+          <div class="mc-val" id="mc-trap-v" style="color:var(--R);">--%</div>
+          <div style="font-size:.6rem;color:#444;margin-top:2px;">How likely WINGO traps</div>
+        </div>
+        <div class="m-card" id="mc-next">
+          <div class="mc-label">AI Prediction Basis</div>
+          <div class="mc-val" id="mc-next-v" style="color:var(--G);">--</div>
+          <div class="mc-tag safe" id="mc-next-t">COMPUTING</div>
+        </div>
+      </div>
+      <div class="manip-alert" id="manip-alert-box">
+        <strong>🔍 AI Status:</strong> <span id="manip-alert-msg">Initializing manipulation detection engine…</span>
+      </div>
+    </div>
+
+    <!-- Probability Matrix -->
+    <div class="prob-panel">
+      <div class="prob-title">📊 NEXT RESULT PROBABILITY</div>
+      <div class="pb-row">
+        <div class="pb-lbl cr">🔴 RED</div>
+        <div class="pb-wrap"><div class="pb-fill r" id="pb-r" style="width:33%;"></div></div>
+        <div class="pb-pct cr" id="pp-r">33%</div>
+        <div class="pb-crown" id="pw-r"></div>
+      </div>
+      <div class="pb-row">
+        <div class="pb-lbl cg">🟢 GREEN</div>
+        <div class="pb-wrap"><div class="pb-fill g" id="pb-g" style="width:33%;"></div></div>
+        <div class="pb-pct cg" id="pp-g">33%</div>
+        <div class="pb-crown" id="pw-g"></div>
+      </div>
+      <div class="pb-row">
+        <div class="pb-lbl cv">🟣 VIOLET</div>
+        <div class="pb-wrap"><div class="pb-fill v" id="pb-v" style="width:10%;"></div></div>
+        <div class="pb-pct cv" id="pp-v">10%</div>
+        <div class="pb-crown" id="pw-v"></div>
+      </div>
+      <div style="height:1px;background:rgba(255,255,255,.05);margin:6px 0;"></div>
+      <div class="pb-row">
+        <div class="pb-lbl cb">⬆ BIG</div>
+        <div class="pb-wrap"><div class="pb-fill b" id="pb-b" style="width:50%;"></div></div>
+        <div class="pb-pct cb" id="pp-b">50%</div>
+        <div class="pb-crown" id="pw-b"></div>
+      </div>
+      <div class="pb-row">
+        <div class="pb-lbl cs">⬇ SMALL</div>
+        <div class="pb-wrap"><div class="pb-fill s" id="pb-s" style="width:50%;"></div></div>
+        <div class="pb-pct cs" id="pp-s">50%</div>
+        <div class="pb-crown" id="pw-s"></div>
+      </div>
+    </div>
+
+    <!-- PREDICTION MAIN -->
+    <div class="pred-main">
+      <div class="pred-tag">🤖 AI SMART PREDICTION</div>
+      <div class="pred-val" id="pred-val">--</div>
+      <div class="pred-type" id="pred-type">INITIALIZING ENGINE…</div>
+
+      <div class="conf-box">
+        <div class="conf-lbl">Prediction Confidence</div>
+        <div class="conf-track"><div class="conf-bar" id="conf-bar" style="width:50%;background:linear-gradient(90deg,#ff3355,#ffd700,#00ff88);"></div></div>
+        <div class="conf-text" id="conf-text" style="color:var(--GOLD);">--</div>
+      </div>
+
+      <div class="streak-bar" id="streak-bar">
+        <span id="streak-flames"></span>
+        <span class="streak-t" id="streak-text">Waiting for first result…</span>
+      </div>
+
+      <div class="bet-display" id="bet-display">Bet: ₹0</div>
+
+      <div class="levels-row">
+        <div class="lv" id="lv1"><div class="lv-n">LEVEL 1</div><div class="lv-p">15%</div><div class="lv-a" id="lv1-a">₹0</div></div>
+        <div class="lv" id="lv2"><div class="lv-n">LEVEL 2</div><div class="lv-p">30%</div><div class="lv-a" id="lv2-a">₹0</div></div>
+        <div class="lv" id="lv3"><div class="lv-n">LEVEL 3</div><div class="lv-p">55%</div><div class="lv-a" id="lv3-a">₹0</div></div>
+      </div>
+
+      <div class="hc-panel">
+        <div class="hc-title">🔥 HOT &amp; ❄️ COLD NUMBERS (Last 30)</div>
+        <div class="hc-chips" id="hc-chips"></div>
+      </div>
+
+      <div class="ai-log">
+        <div class="ai-log-title">🧠 AI ANALYSIS LOG</div>
+        <div id="ai-log-entries"><div class="ai-log-entry"><span class="ai-icon">⚡</span><span>Engine initializing…</span></div></div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="hist-panel">
+      <div class="hist-head">
+        <span class="hist-title">📋 PREDICTION HISTORY</span>
+        <span id="hist-summary" style="font-size:.68rem;color:#666;">--</span>
+      </div>
+      <div id="hist-items"><div style="text-align:center;padding:16px;color:#555;font-size:.8rem;">No predictions yet…</div></div>
+    </div>
+
+    <div style="text-align:center;margin-top:14px;font-size:.65rem;color:#333;">© Mickey X Web 2024 | Ultra Pro Predictor v5.0</div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+/* ════════════════════════════════════════════════════════════
+   FIREBASE
+════════════════════════════════════════════════════════════ */
+firebase.initializeApp({
+  apiKey:"AIzaSyCShaI7FfDCvZ9t21RdBk7ATjk5PQUAeQI",
+  authDomain:"wingo-predictor-hub.firebaseapp.com",
+  databaseURL:"https://wingo-predictor-hub-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"wingo-predictor-hub",storageBucket:"wingo-predictor-hub.firebasestorage.app",
+  messagingSenderId:"510934626240",appId:"1:510934626240:web:8df9c4b4a78964f15d2225"
+});
+const DB = firebase.database();
+
+/* ════════ PARTICLES ════════ */
+particlesJS("pg",{particles:{number:{value:45,density:{enable:true,value_area:900}},color:{value:"#bc13fe"},shape:{type:"circle"},opacity:{value:.2},size:{value:2},line_linked:{enable:true,distance:130,color:"#bc13fe",opacity:.12,width:1},move:{enable:true,speed:1.2,direction:"none",out_mode:"bounce"}}});
+
+/* ════════ MATRIX RAIN ════════ */
+(function(){
+  const c=document.getElementById('matrix-canvas');
+  const ctx=c.getContext('2d');
+  c.width=window.innerWidth; c.height=window.innerHeight;
+  window.addEventListener('resize',()=>{c.width=window.innerWidth;c.height=window.innerHeight;});
+  const cols=Math.floor(c.width/16);
+  const drops=Array(cols).fill(1);
+  const chars='01REDGREENBIGSMALL'.split('');
+  setInterval(()=>{
+    ctx.fillStyle='rgba(5,0,5,.05)';ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle='#bc13fe';ctx.font='13px monospace';
+    drops.forEach((y,i)=>{
+      ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*16,y*16);
+      if(y*16>c.height&&Math.random()>.975) drops[i]=0;
+      drops[i]++;
+    });
+  },60);
+})();
+
+/* ════════ LIVE STATS ANIMATION (Landing) ════════ */
+(function(){
+  let u=247,w=1843;
+  document.getElementById('live-users').textContent=u;
+  document.getElementById('live-wins').textContent=w;
+  setInterval(()=>{
+    u+=Math.floor(Math.random()*3)-1; u=Math.max(200,Math.min(400,u));
+    w+=Math.floor(Math.random()*2);
+    document.getElementById('live-users').textContent=u;
+    document.getElementById('live-wins').textContent=w;
+  },3500);
+  const tickers=[
+    "Rahul earned ₹3500","Priya hit ₹10000 target","Amit won ₹1500","Sneha profit ₹25000",
+    "Vikram earned ₹50000","Riya won ₹3500","Mohit hit target ₹70000","Deepak profit ₹10000"
+  ];
+  document.getElementById('ticker-text').textContent=tickers.join('   🎉   ');
+})();
+
+/* ════════════════════════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════════════════════════ */
+const API = "https://wingolast100.vercel.app/api/results?typeId=1&apiKey=12a04165-748c-4144-9398-96bd2e0ad956&token=1a97a413-ff57-4097-a44c-4bd402ace8d5&limit=100";
+const TARGETS = {
+  "350-1500" :{start:350,  target:1500,  price:250,  booster:50,  ins:100},
+  "500-3500" :{start:500,  target:3500,  price:500,  booster:100, ins:200},
+  "1000-10000":{start:1000,target:10000, price:999,  booster:200, ins:400},
+  "2500-25000":{start:2500,target:25000, price:1500, booster:300, ins:600},
+  "5000-50000":{start:5000,target:50000, price:2500, booster:500, ins:1000},
+  "1000-35000":{start:1000,target:35000, price:5000, booster:1000,ins:2000},
+  "2000-70000":{start:2000,target:70000, price:10000,booster:2000,ins:4000}
+};
+
+/* ════════════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════════════ */
+let results=[], platform='', targetKey='', basePrice=0;
+let balance=0, targetGoal=0, lvl=1, betAmt=0, origBal=0;
+let history=[], wins=0, losses=0, totalP=0;
+let userId='', payId='';
+let accBooster=false, insActive=false, accPrice=0, insPrice=0, totalPay=0;
+let curPeriod='', lastPredTime=0;
+let soundOn=true, cdTimer=null, cdStart=null;
+const CD=60;
+
+/* ════════ NEW AI ENGINE STATE ════════ */
+// Loss tracking - does NOT cause mode switch, instead triggers counter-analysis
+let consecLosses = 0;
+
+// Manipulation memory: logs {ourPred, actual, manipType}
+let manipMemory  = [];  // last 10 entries
+
+// Pattern weights that DECREASE when wrong (learning)
+// These are multipliers applied to raw probability
+let learnWeights = { RED:1, GREEN:1, BIG:1, SMALL:1 };
+
+// AI log entries
+let aiLog = [];
+
+// Last actual result
+let lastActual = null;
+// Last prediction we made
+let lastPred   = null;
+
+/* ════════════════════════════════════════════════════════════
+   HELPER
+════════════════════════════════════════════════════════════ */
+function getInfo(n) {
+  n = parseInt(n);
+  return {
+    n,
+    size:  n >= 5 ? 'BIG' : 'SMALL',
+    color: (n===0||n===5) ? 'VIOLET' : (n%2===0 ? 'RED' : 'GREEN')
+  };
+}
+
+function uid() {
+  let id = localStorage.getItem('mxw5_uid');
+  if (!id) { id='u5_'+Date.now()+'_'+Math.random().toString(36).substr(2,9); localStorage.setItem('mxw5_uid',id); }
+  return id;
+}
+userId = uid();
+
+async function fetchAPI() {
+  try {
+    const r = await fetch(API);
+    if (!r.ok) throw 0;
+    const d = await r.json();
+    if (d.code===0 && d.data?.list) { results=d.data.list; return true; }
+    return false;
+  } catch(e) { return false; }
+}
+
+/* ════════════════════════════════════════════════════════════
+   ██████  CORE PREDICTION ALGORITHM — NO MODE SWITCH  ██████
+   
+   Strategy: Calculate probability for EACH outcome (RED, GREEN,
+   BIG, SMALL) independently. Pick whichever has the highest
+   weighted probability. Never switch based on loss type.
+   After a loss: DETECT the manipulation pattern and ADJUST
+   probability weights to counter it next time.
+════════════════════════════════════════════════════════════ */
+
+/*
+  MANIPULATION TYPES WINGO USES:
+  1. STREAK_TRAP     — gives 3-4 same then suddenly flips to trick predictors
+  2. POPULAR_AVOID   — gives opposite of what is "obviously" predicted
+  3. OSCILLATE_BREAK — alternates then breaks the alternation
+  4. RANDOM_SPIKE    — pure randomness for a few rounds to confuse
+  5. SAFE_ZONE       — gives predictable results when nothing big is at stake
+*/
+
+function detectManipulationType() {
+  if (!results || results.length < 10) return { type:'UNKNOWN', confidence:0 };
+
+  const last10 = results.slice(0,10).map(r=>getInfo(r.number));
+  const last5  = last10.slice(0,5);
+
+  // Check streak
+  let cStreak=1, sStreak=1;
+  for(let i=1;i<last10.length;i++){if(last10[i].color===last10[0].color)cStreak++;else break;}
+  for(let i=1;i<last10.length;i++){if(last10[i].size===last10[0].size)sStreak++;else break;}
+
+  // Check alternation
+  let cAlt=true, sAlt=true;
+  for(let i=1;i<Math.min(6,last5.length);i++){
+    if(last5[i].color===last5[i-1].color) cAlt=false;
+    if(last5[i].size===last5[i-1].size)   sAlt=false;
+  }
+
+  // Check if last 5 had sudden break after streak
+  const hadStreak3 = (()=>{
+    let s=1;
+    for(let i=1;i<last10.length;i++){if(last10[i].color===last10[i-1].color)s++;else break;}
+    return s>=3;
+  })();
+
+  // Count transitions in last 10
+  let transitions=0;
+  for(let i=1;i<last10.length;i++) if(last10[i].color!==last10[i-1].color) transitions++;
+  const transRate = transitions/9; // 0=no change, 1=all change
+
+  // Check manipMemory for loss patterns
+  const recentLosses = manipMemory.slice(-5).filter(m=>m.isLoss);
+  const lossOnPredicted = recentLosses.filter(m=>{
+    // Did WINGO give opposite of what we predicted?
+    if(m.ourPred==='RED'   && m.actual.color==='GREEN') return true;
+    if(m.ourPred==='GREEN' && m.actual.color==='RED')   return true;
+    if(m.ourPred==='BIG'   && m.actual.size==='SMALL')  return true;
+    if(m.ourPred==='SMALL' && m.actual.size==='BIG')    return true;
+    return false;
+  }).length;
+
+  let type='STABLE', conf=40;
+  if (lossOnPredicted >= 3) { type='POPULAR_AVOID'; conf=85; }
+  else if (cStreak>=4 || sStreak>=4) { type='STREAK_TRAP'; conf=75; }
+  else if (cAlt && sAlt && hadStreak3) { type='OSCILLATE_BREAK'; conf=70; }
+  else if (transRate > .7) { type='RANDOM_SPIKE'; conf=65; }
+  else if (cAlt && sAlt) { type='OSCILLATING'; conf=60; }
+  else { type='STABLE'; conf=50; }
+
+  return { type, conf, cStreak, sStreak, cAlt, sAlt, transRate, lossOnPredicted };
+}
+
+/* ════════ COMPUTE FULL PROBABILITY ════════
+   Returns {RED, GREEN, VIOLET, BIG, SMALL} as percentages.
+   These probabilities already include manipulation correction.
+════════════════════════════════════════════ */
+function computeAllProbabilities(manip) {
+  if (!results || results.length < 15) return null;
+
+  const last50 = results.slice(0,50);
+  const last20 = results.slice(0,20);
+  const last10 = results.slice(0,10);
+  const last5  = results.slice(0,5);
+
+  // === Step 1: Raw frequency scores ===
+  let rawR=0,rawG=0,rawV=0,rawB=0,rawS=0;
+  last20.forEach(r=>{
+    const {color,size}=getInfo(r.number);
+    if(color==='RED')rawR++;
+    else if(color==='GREEN')rawG++;
+    else rawV++;
+    if(size==='BIG')rawB++;else rawS++;
+  });
+
+  // === Step 2: Markov transition (what usually comes after current?) ===
+  const lastInfo = getInfo(results[0].number);
+  let mxR=0,mxG=0,mxV=0,mxB=0,mxS=0, mxTotal=0;
+  for(let i=0;i<last50.length-1;i++){
+    const cur=getInfo(last50[i].number), nxt=getInfo(last50[i+1].number);
+    if(cur.color===lastInfo.color && cur.size===lastInfo.size){
+      if(nxt.color==='RED')mxR++;
+      else if(nxt.color==='GREEN')mxG++;
+      else mxV++;
+      if(nxt.size==='BIG')mxB++;else mxS++;
+      mxTotal++;
+    }
+  }
+  if(mxTotal>0){mxR/=mxTotal;mxG/=mxTotal;mxV/=mxTotal;mxB/=mxTotal;mxS/=mxTotal;}
+  else{mxR=mxG=.33;mxV=.1;mxB=mxS=.5;}
+
+  // === Step 3: Streak pressure (long streak → reversal likely) ===
+  let {cStreak=1,sStreak=1,cAlt=false,sAlt=false}=manip;
+  let streakBiasColor={RED:0,GREEN:0}; // positive = this color more likely
+  let streakBiasSize={BIG:0,SMALL:0};
+
+  if(cStreak>=5){// Very long streak → WINGO WILL flip
+    if(lastInfo.color==='RED'){streakBiasColor.RED-=25;streakBiasColor.GREEN+=25;}
+    else{streakBiasColor.GREEN-=25;streakBiasColor.RED+=25;}
+  }else if(cStreak>=3){
+    if(lastInfo.color==='RED'){streakBiasColor.RED-=15;streakBiasColor.GREEN+=15;}
+    else{streakBiasColor.GREEN-=15;streakBiasColor.RED+=15;}
+  }else if(cStreak>=2){
+    if(lastInfo.color==='RED'){streakBiasColor.RED-=8;streakBiasColor.GREEN+=8;}
+    else{streakBiasColor.GREEN-=8;streakBiasColor.RED+=8;}
+  }
+
+  if(sStreak>=5){
+    if(lastInfo.size==='BIG'){streakBiasSize.BIG-=25;streakBiasSize.SMALL+=25;}
+    else{streakBiasSize.SMALL-=25;streakBiasSize.BIG+=25;}
+  }else if(sStreak>=3){
+    if(lastInfo.size==='BIG'){streakBiasSize.BIG-=15;streakBiasSize.SMALL+=15;}
+    else{streakBiasSize.SMALL-=15;streakBiasSize.BIG+=15;}
+  }else if(sStreak>=2){
+    if(lastInfo.size==='BIG'){streakBiasSize.BIG-=8;streakBiasSize.SMALL+=8;}
+    else{streakBiasSize.SMALL-=8;streakBiasSize.BIG+=8;}
+  }
+
+  // === Step 4: Alternation detection ===
+  if(cAlt){// strict alternation → predict opposite
+    if(lastInfo.color==='RED'){streakBiasColor.GREEN+=18;streakBiasColor.RED-=12;}
+    else{streakBiasColor.RED+=18;streakBiasColor.GREEN-=12;}
+  }
+  if(sAlt){
+    if(lastInfo.size==='BIG'){streakBiasSize.SMALL+=18;streakBiasSize.BIG-=12;}
+    else{streakBiasSize.BIG+=18;streakBiasSize.SMALL-=12;}
+  }
+
+  // === Step 5: Manipulation correction ===
+  let manipBiasColor={RED:0,GREEN:0}, manipBiasSize={BIG:0,SMALL:0};
+  switch(manip.type){
+    case 'POPULAR_AVOID':
+      // WINGO avoids giving the "popular/obvious" choice
+      // The obvious choice would be the high-frequency one → reduce it, boost opposite
+      if(rawR>rawG){manipBiasColor.RED-=20;manipBiasColor.GREEN+=20;}
+      else{manipBiasColor.GREEN-=20;manipBiasColor.RED+=20;}
+      if(rawB>rawS){manipBiasSize.BIG-=15;manipBiasSize.SMALL+=15;}
+      else{manipBiasSize.SMALL-=15;manipBiasSize.BIG+=15;}
+      break;
+    case 'STREAK_TRAP':
+      // WINGO sets up a convincing streak then breaks it
+      // Already handled by streakBias, add extra boost
+      if(lastInfo.color==='RED'){manipBiasColor.GREEN+=15;}
+      else{manipBiasColor.RED+=15;}
+      break;
+    case 'OSCILLATE_BREAK':
+      // Was alternating, about to break → continue current pattern
+      if(lastInfo.color==='RED'){manipBiasColor.RED+=12;manipBiasColor.GREEN-=8;}
+      else{manipBiasColor.GREEN+=12;manipBiasColor.RED-=8;}
+      break;
+    case 'RANDOM_SPIKE':
+      // True randomness → trust Markov most, reduce bias
+      break;
+  }
+
+  // === Step 6: Learning weight correction ===
+  // learnWeights are adjusted after each loss
+  const lwR = learnWeights.RED   || 1;
+  const lwG = learnWeights.GREEN || 1;
+  const lwB = learnWeights.BIG   || 1;
+  const lwS = learnWeights.SMALL || 1;
+
+  // === Step 7: Combine all signals ===
+  // Weights: Markov=40%, Frequency=25%, Streak=20%, Manip=15%
+  const baseR = (mxR*40 + (rawR/20)*25) / 65;
+  const baseG = (mxG*40 + (rawG/20)*25) / 65;
+  const baseV = (mxV*40 + (rawV/20)*25) / 65;
+  const baseB = (mxB*40 + (rawB/20)*25) / 65;
+  const baseS = (mxS*40 + (rawS/20)*25) / 65;
+
+  let pR = baseR*100 + streakBiasColor.RED   + manipBiasColor.RED;
+  let pG = baseG*100 + streakBiasColor.GREEN + manipBiasColor.GREEN;
+  let pV = baseV*100; // violet unaffected
+  let pB = baseB*100 + streakBiasSize.BIG    + manipBiasSize.BIG;
+  let pS = baseS*100 + streakBiasSize.SMALL  + manipBiasSize.SMALL;
+
+  // Apply learning weights
+  pR *= lwR; pG *= lwG; pB *= lwB; pS *= lwS;
+
+  // Clamp minimums
+  pR=Math.max(5,pR); pG=Math.max(5,pG); pV=Math.max(2,pV);
+  pB=Math.max(5,pB); pS=Math.max(5,pS);
+
+  // Normalize colors to 100
+  const cSum=pR+pG+pV;
+  pR=Math.round(pR/cSum*95); pG=Math.round(pG/cSum*95); pV=95-pR-pG;
+
+  // Normalize sizes to 100
+  const sSum=pB+pS;
+  pB=Math.round(pB/sSum*100); pS=100-pB;
+
+  return {pR,pG,pV,pB,pS,lastColor:lastInfo.color,lastSize:lastInfo.size};
+}
+
+/* ════════ MASTER DECISION: Pick best single outcome ════════
+   NO MODE SWITCHING. We pick whichever single value (RED/GREEN/BIG/SMALL)
+   has the highest probability after ALL signals are combined.
+════════════════════════════════════════════════════════════ */
+function decidePrediction(probs, manip) {
+  if (!probs) return null;
+  const {pR,pG,pV,pB,pS} = probs;
+
+  // Score each option (higher = more confident = predict this)
+  // Color options: RED = pR, GREEN = pG (we ignore VIOLET as prediction)
+  const colorChoice = pR >= pG ? {val:'RED',pct:pR,type:'color'} : {val:'GREEN',pct:pG,type:'color'};
+  const sizeChoice  = pB >= pS ? {val:'BIG',pct:pB,type:'size'} : {val:'SMALL',pct:pS,type:'size'};
+
+  // Choose whichever has higher confidence
+  let chosen;
+  const colorConf = colorChoice.pct;
+  const sizeConf  = sizeChoice.pct;
+
+  if (Math.abs(colorConf - sizeConf) < 8) {
+    // Very close: pick based on manipulation context
+    if (manip.type==='STREAK_TRAP' || manip.type==='POPULAR_AVOID') {
+      // These are color-based manipulations → trust color analysis more
+      chosen = colorConf >= sizeConf ? colorChoice : sizeChoice;
+    } else {
+      // Trust size more (BIG/SMALL is 50/50 baseline = easier to predict with Markov)
+      chosen = sizeConf >= colorConf ? sizeChoice : colorChoice;
+    }
+  } else {
+    chosen = colorConf >= sizeConf ? colorChoice : sizeChoice;
+  }
+
+  // Confidence of final prediction
+  const rawConf = chosen.pct;
+  // Boost confidence if multiple signals agree
+  let confBoost = 0;
+  if (manip.conf > 70) confBoost += 8;
+  if (consecLosses === 0 && manipMemory.length > 3) confBoost += 5;
+  const finalConf = Math.min(95, Math.max(45, rawConf + confBoost));
+
+  return { ...chosen, confidence: finalConf, manip };
+}
+
+/* ════════════════════════════════════════════════════════════
+   LEARNING: Update weights after result
+   Called after every result comes in.
+════════════════════════════════════════════════════════════ */
+function updateLearning(ourPred, actual, isWin) {
+  const entry = { ourPred: ourPred.val, ourType: ourPred.type, actual, isLoss:!isWin };
+  manipMemory.push(entry);
+  if (manipMemory.length > 12) manipMemory.shift();
+
+  if (!isWin) {
+    // REDUCE weight of what we predicted (we were wrong about it)
+    const wrongVal = ourPred.val;
+    learnWeights[wrongVal] = Math.max(0.4, (learnWeights[wrongVal]||1) - 0.18);
+
+    // INCREASE weight of what ACTUALLY came (reward actual outcome)
+    const rightColor = actual.color;
+    const rightSize  = actual.size;
+    if (rightColor !== 'VIOLET') {
+      learnWeights[rightColor] = Math.min(2.0, (learnWeights[rightColor]||1) + 0.12);
+    }
+    learnWeights[rightSize] = Math.min(2.0, (learnWeights[rightSize]||1) + 0.12);
+
+    addAILog(`❌ Loss on ${wrongVal}. Reduced its weight. Actual: ${actual.color}/${actual.size}. Adjusting…`);
+  } else {
+    // On win: slowly normalize all weights back toward 1
+    ['RED','GREEN','BIG','SMALL'].forEach(k=>{
+      learnWeights[k] = learnWeights[k] ? learnWeights[k]*0.95 + 0.05 : 1;
+    });
+    addAILog(`✅ Win on ${ourPred.val}! Weights updated. Accuracy improving.`);
+  }
+}
+
+function addAILog(msg) {
+  aiLog.unshift(msg);
+  if(aiLog.length>6) aiLog.pop();
+  const c=document.getElementById('ai-log-entries');
+  if(c){
+    c.innerHTML='';
+    aiLog.forEach(m=>{
+      const d=document.createElement('div');
+      d.className='ai-log-entry';
+      d.innerHTML=`<span class="ai-icon">▸</span><span>${m}</span>`;
+      c.appendChild(d);
+    });
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   UI UPDATE FUNCTIONS
+════════════════════════════════════════════════════════════ */
+function updateManipPanel(manip) {
+  const typeColors={STABLE:'#00ff88',STREAK_TRAP:'#ff9900',POPULAR_AVOID:'#ff3355',OSCILLATE_BREAK:'#ffd700',RANDOM_SPIKE:'#bb44ff',OSCILLATING:'#00d4ff',UNKNOWN:'#888'};
+  const tagMap={STABLE:'safe',STREAK_TRAP:'warn',POPULAR_AVOID:'crit',OSCILLATE_BREAK:'warn',RANDOM_SPIKE:'warn',OSCILLATING:'safe',UNKNOWN:'safe'};
+
+  const pv=document.getElementById('mc-pattern-v'); const pt=document.getElementById('mc-pattern-t');
+  const mv=document.getElementById('mc-manip-v'); const mt=document.getElementById('mc-manip-t');
+  const tv=document.getElementById('mc-trap-v');
+  const nv=document.getElementById('mc-next-v'); const nt=document.getElementById('mc-next-t');
+  const msg=document.getElementById('manip-alert-msg');
+
+  // Pattern
+  let patternText=manip.cStreak>=4?`STREAK x${manip.cStreak}`:manip.cAlt?'ALTERNATING':manip.transRate>.7?'RANDOM':'MIXED';
+  if(pv) pv.textContent=patternText;
+  if(pt) {pt.className='mc-tag '+(manip.cStreak>=4?'warn':manip.cAlt?'safe':'safe'); pt.textContent=manip.cStreak>=4?'STREAK!':manip.cAlt?'ALT':'NORMAL';}
+
+  // Manipulation
+  if(mv){mv.textContent=manip.type.replace('_',' ');mv.style.color=typeColors[manip.type]||'#888';}
+  if(mt){mt.className='mc-tag '+tagMap[manip.type]; mt.textContent=manip.type==='STABLE'?'SAFE':manip.conf>70?'DETECTED!':'POSSIBLE';}
+
+  // Trap probability
+  const trapPct=manip.conf;
+  if(tv){tv.textContent=trapPct+'%'; tv.style.color=trapPct>70?'#ff3355':trapPct>50?'#ff9900':'#00ff88';}
+  const mc=document.getElementById('mc-trap');
+  if(mc){mc.className='m-card'+(trapPct>70?' danger':trapPct>50?' highlight':'');}
+
+  // Next basis
+  if(nv) nv.textContent=manip.type==='POPULAR_AVOID'?'ANTI-RIG':manip.type==='STREAK_TRAP'?'REVERSAL':'MARKOV+FREQ';
+  if(nt) nt.textContent='COMPUTED';
+
+  // Alert message
+  const alerts={
+    POPULAR_AVOID:`⚠️ WINGO is avoiding popular predictions! AI counter-strategy activated.`,
+    STREAK_TRAP:`🎯 Streak trap detected (${manip.cStreak}x). Reversal signal active.`,
+    OSCILLATE_BREAK:`📊 Oscillation break pattern. AI adjusted prediction.`,
+    RANDOM_SPIKE:`🎲 Random phase detected. Markov engine at maximum weight.`,
+    OSCILLATING:`↕️ Clean alternation pattern. High confidence prediction.`,
+    STABLE:`✅ Algorithm stable. Multi-signal prediction active.`
+  };
+  if(msg) msg.textContent=alerts[manip.type]||'AI analysis running…';
+}
+
+function updateProbBars(probs) {
+  if(!probs) return;
+  const {pR,pG,pV,pB,pS}=probs;
+  const setPB=(id,pct,color,winner)=>{
+    const b=document.getElementById('pb-'+id), p=document.getElementById('pp-'+id), w=document.getElementById('pw-'+id);
+    if(b)b.style.width=pct+'%'; if(p){p.textContent=pct+'%';} if(w)w.textContent=winner?'👑':'';
+  };
+  const bestColor=pR>=pG?'r':'g';
+  const bestSize=pB>=pS?'b':'s';
+  setPB('r',pR,'r',bestColor==='r'); setPB('g',pG,'g',bestColor==='g');
+  setPB('v',pV,'v',false);
+  setPB('b',pB,'b',bestSize==='b'); setPB('s',pS,'s',bestSize==='s');
+}
+
+function updateConf(conf) {
+  const bar=document.getElementById('conf-bar'), txt=document.getElementById('conf-text');
+  if(bar){
+    bar.style.width=conf+'%';
+    bar.style.background=conf>=80?'linear-gradient(90deg,#00aa44,#00ff88)':conf>=65?'linear-gradient(90deg,#886600,#ffd700)':'linear-gradient(90deg,#880022,#ff3355)';
+  }
+  if(txt){
+    const lbl=conf>=85?'🔥 VERY HIGH':conf>=72?'✅ HIGH':conf>=58?'⚡ MEDIUM':'⚠️ LOW';
+    const col=conf>=85?'#00ff88':conf>=72?'#ffd700':conf>=58?'#ff9900':'#ff4444';
+    txt.textContent=`${conf}% — ${lbl}`; txt.style.color=col;
+  }
+}
+
+function updateHotCold() {
+  if(!results||results.length<10) return;
+  const freq=Array(10).fill(0);
+  results.slice(0,30).forEach(r=>{const n=parseInt(r.number);if(n>=0&&n<=9)freq[n]++;});
+  const s=[...freq.map((f,i)=>({n:i,f}))].sort((a,b)=>b.f-a.f);
+  const hot=s.slice(0,3).map(x=>x.n), cold=s.slice(-3).map(x=>x.n);
+  const c=document.getElementById('hc-chips');
+  if(!c)return; c.innerHTML='';
+  for(let i=0;i<=9;i++){
+    const ch=document.createElement('div');
+    ch.className='hc-chip '+(hot.includes(i)?'hot':cold.includes(i)?'cold':'norm');
+    ch.textContent=i; ch.title=`${freq[i]}x in last 30`;
+    c.appendChild(ch);
+  }
+}
+
+function updateMiniResults() {
+  if(!results||results.length<5) return;
+  const c=document.getElementById('mr-chips'); if(!c)return; c.innerHTML='';
+  results.slice(0,10).forEach(r=>{
+    const {n,color}=getInfo(r.number);
+    const cls=color==='VIOLET'?'v':color==='RED'?'r':'g';
+    const ch=document.createElement('div'); ch.className='mr-chip '+cls; ch.textContent=n; ch.title=r.issueNumber;
+    c.appendChild(ch);
+  });
+}
+
+function updateStats() {
+  const b=document.getElementById('st-bal'), wr=document.getElementById('st-wr'), pg=document.getElementById('st-pg');
+  if(b)b.textContent=`₹${balance}`;
+  if(wr){const w=totalP>0?Math.round((wins/totalP)*100):0; wr.textContent=w+'%'; wr.style.color=w>=70?'var(--G)':w>=50?'var(--GOLD)':'var(--R)';}
+  if(pg&&targetGoal>0){const start=TARGETS[targetKey]?.start||0; const p=Math.min(100,Math.max(0,Math.round((balance-start)/(targetGoal-start)*100))); pg.textContent=p+'%'; pg.style.color=p>=70?'var(--G)':p>=30?'var(--GOLD)':'var(--T)';}
+}
+
+function updateStreak() {
+  const f=document.getElementById('streak-flames'), t=document.getElementById('streak-text');
+  if(!f||!t)return;
+  const streak=consecLosses>0?consecLosses:wins;
+  if(consecLosses>0){f.textContent='❄️'.repeat(Math.min(consecLosses,5));t.textContent=`${consecLosses} LOSS — Counter-Analysis Active`;t.className='streak-t l';}
+  else if(wins>0&&totalP>0&&wins===totalP){f.textContent='🔥'.repeat(Math.min(wins,5));t.textContent=`${wins} WIN STREAK!`;t.className='streak-t w';}
+  else{f.textContent='';t.textContent='Monitoring…';t.className='streak-t';}
+}
+
+/* ════════════════════════════════════════════════════════════
+   PREDICTOR MAIN LOOP
+════════════════════════════════════════════════════════════ */
+async function generatePrediction() {
+  if(history.find(h=>h.period===curPeriod)) return;
+  await fetchAPI();
+
+  const manip  = detectManipulationType();
+  const probs  = computeAllProbabilities(manip);
+  const pred   = decidePrediction(probs, manip);
+
+  if(!pred){ addAILog('Insufficient data, waiting…'); return; }
+
+  // Update UI
+  updateManipPanel(manip);
+  updateProbBars(probs);
+  updateHotCold();
+  updateConf(pred.confidence);
+
+  // Show prediction
+  const pv=document.getElementById('pred-val');
+  pv.textContent=pred.val;
+  pv.className='pred-val pred-flash '+(pred.val.toLowerCase());
+  setTimeout(()=>pv.classList.remove('pred-flash'),600);
+  const pt=document.getElementById('pred-type');
+  if(pt) pt.textContent=`${pred.type.toUpperCase()} — ${pred.val} (${pred.confidence}% confident)`;
+
+  addAILog(`Predicting ${pred.val} (${pred.type}) — Manip: ${manip.type} — Conf: ${pred.confidence}%`);
+  playSound('new');
+
+  const entry={
+    mode: pred.type==='color'?'COLOR':'SIZE',
+    val: pred.val, period:curPeriod,
+    bet:betAmt, lvl, status:'PENDING',
+    conf:pred.confidence, reason:`${manip.type} → ${pred.val}`, ts:Date.now()
+  };
+  history.unshift(entry);
+  lastPred = pred;
+  renderHistory();
+}
+
+function processResult() {
+  if(!history.length||!results.length) return;
+  const prevP=(BigInt(curPeriod)-1n).toString();
+  const pend=history.find(h=>h.status==='PENDING'&&h.period===prevP);
+  if(!pend) return;
+  const match=results.find(r=>r.issueNumber===prevP);
+  if(!match) return;
+
+  const actual=getInfo(match.number); lastActual=actual;
+  let isWin=false;
+  if(pend.mode==='SIZE'&&pend.val===actual.size) isWin=true;
+  else if(pend.mode==='COLOR'){
+    if(actual.n===0&&pend.val==='RED') isWin=true;
+    else if(actual.n===5&&pend.val==='GREEN') isWin=true;
+    else if(pend.val===actual.color) isWin=true;
+  }
+
+  pend.status=isWin?'WIN':'LOSS';
+  pend.actual=`${actual.n} (${actual.size}/${actual.color})`;
+
+  // Update learning
+  if(lastPred) updateLearning(lastPred, actual, isWin);
+
+  if(isWin){
+    balance+=pend.bet; lvl=1; origBal=balance;
+    wins++; consecLosses=0; lastPred=null;
+    playSound('win');
+  } else {
+    balance-=pend.bet; losses++;
+    consecLosses++;
+    if(lvl<3) lvl++; else{lvl=1;origBal=balance;}
+    playSound('loss');
+  }
+
+  totalP++;
+  updateStreak(); updateStats();
+  document.getElementById('st-bal').textContent=`₹${balance}`;
+  updateBets();
+
+  if(balance<=0){setTimeout(()=>{DB.ref('sessions/'+userId).remove();goHome();showLose();},500);return;}
+  if(balance>=targetGoal){setTimeout(()=>showWin(),800);}
+  renderHistory();
+}
+
+async function startPredictor() {
+  const ok=await fetchAPI();
+  const ae=document.getElementById('api-status-text');// legacy
+  if(results.length>0){
+    curPeriod=(BigInt(results[0].issueNumber)+1n).toString();
+    document.getElementById('cur-period').textContent=curPeriod;
+    updateMiniResults(); await generatePrediction();
+  }
+  startCD();
+  setInterval(tick,500);
+}
+
+async function tick() {
+  const now=Date.now(); if(now-lastPredTime<1000)return;
+  const ok=await fetchAPI();
+  // update time
+  const el=document.getElementById('last-update-time');
+  if(el){const d=new Date();el.textContent=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;}
+  if(results.length>0){
+    const np=(BigInt(results[0].issueNumber)+1n).toString();
+    if(np!==curPeriod){
+      curPeriod=np; document.getElementById('cur-period').textContent=curPeriod;
+      cdStart=Date.now();
+      processResult(); updateMiniResults(); updateStreak();
+      await generatePrediction(); lastPredTime=now;
+    }
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   UTILITY
+════════════════════════════════════════════════════════════ */
+function startCD(){
+  if(cdTimer)clearInterval(cdTimer); cdStart=Date.now();
+  cdTimer=setInterval(()=>{
+    const el=document.getElementById('cd-val'); if(!el)return;
+    const rem=Math.max(0,CD-((Date.now()-cdStart)/1000));
+    const m=Math.floor(rem/60),s=Math.floor(rem%60);
+    el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    el.className=rem<=10?'cd-val urgent':'cd-val';
+  },200);
+}
+
+function updateBets(){
+  const l1=Math.floor(origBal*.15),l2=Math.floor(origBal*.30),l3=origBal-l1-l2;
+  document.getElementById('lv1-a').textContent=`₹${l1}`;
+  document.getElementById('lv2-a').textContent=`₹${l2}`;
+  document.getElementById('lv3-a').textContent=`₹${l3}`;
+  betAmt=lvl===1?l1:lvl===2?l2:l3;
+  document.getElementById('bet-display').textContent=`Bet: ₹${betAmt}`;
+  ['1','2','3'].forEach(n=>document.getElementById('lv'+n).className='lv'+(lvl==n?' active':''));
+  updateStats();
+}
+
+function playSound(t){
+  if(!soundOn)return;
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    if(t==='win'){o.frequency.setValueAtTime(523,ctx.currentTime);o.frequency.setValueAtTime(784,ctx.currentTime+.15);g.gain.setValueAtTime(.25,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.6);}
+    else if(t==='loss'){o.frequency.setValueAtTime(250,ctx.currentTime);o.frequency.setValueAtTime(180,ctx.currentTime+.25);g.gain.setValueAtTime(.25,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.5);}
+    else{o.frequency.setValueAtTime(440,ctx.currentTime);g.gain.setValueAtTime(.15,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.25);}
+    o.start(ctx.currentTime);o.stop(ctx.currentTime+.7);
+  }catch(e){}
+}
+
+function toggleSound(){soundOn=!soundOn;const i=document.getElementById('sound-ico');if(i)i.className=soundOn?'fas fa-volume-up':'fas fa-volume-mute';}
+
+function renderHistory(){
+  const c=document.getElementById('hist-items'); if(!c)return;
+  c.innerHTML='';
+  if(!history.length){c.innerHTML='<div style="text-align:center;padding:14px;color:#444;font-size:.78rem;">No predictions yet…</div>';return;}
+  const w=history.filter(h=>h.status==='WIN').length, l=history.filter(h=>h.status==='LOSS').length, p=history.filter(h=>h.status==='PENDING').length;
+  const hs=document.getElementById('hist-summary');
+  if(hs)hs.innerHTML=`<span style="color:var(--G);">${w}W</span> <span style="color:var(--R);">${l}L</span> <span style="color:var(--GOLD);">${p}P</span>`;
+  history.forEach(h=>{
+    const d=document.createElement('div');
+    const cls=h.status==='WIN'?'wi':h.status==='LOSS'?'lo':'pe';
+    d.className='hist-item '+cls;
+    const vc=h.val==='RED'?'cr':h.val==='GREEN'?'cg':h.val==='BIG'?'cb':h.val==='SMALL'?'cs':'cv';
+    const sc=h.status==='WIN'?'cg':h.status==='LOSS'?'cr':'cb';
+    const mBadge=`<span style="color:${h.mode==='COLOR'?'#ff6666':'#6699ff'};font-size:.62rem;">${h.mode}</span>`;
+    d.innerHTML=`
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        ${mBadge}
+        <span style="font-size:.6rem;color:#444;">P:…${h.period.slice(-4)}</span>
+      </div>
+      <div style="text-align:center;">
+        <div class="${vc}" style="font-weight:700;font-size:1.05rem;">${h.val}</div>
+        <div style="font-size:.62rem;color:#555;">₹${h.bet} • ${h.conf}%</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="${sc}" style="font-weight:700;font-size:.85rem;">${h.status}</div>
+        <div style="font-size:.6rem;color:#444;">${h.actual||'Pending'}</div>
+      </div>`;
+    c.appendChild(d);
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   NAVIGATION / PAGES
+════════════════════════════════════════════════════════════ */
+function goTo(id){
+  ['landing-page','target-page','addons-page','payment-page'].forEach(p=>{
+    document.getElementById(p).style.display='none';
+  });
+  document.getElementById(id).style.display='flex';
+}
+
+function openTarget(p){platform=p;goTo('target-page');}
+
+function selectTarget(key,price){
+  targetKey=key; basePrice=price;
+  const cfg=TARGETS[key]; accPrice=cfg.booster; insPrice=cfg.ins;
+  accBooster=false; insActive=false;
+  document.getElementById('ao-target-name').textContent=key.replace('-',' → ₹');
+  document.getElementById('ao-acc-price').textContent=`₹${accPrice}`;
+  document.getElementById('ao-ins-price').textContent=`₹${insPrice}`;
+  document.getElementById('ao-acc-btn').className='ao-add'; document.getElementById('ao-acc-btn').innerHTML='<i class="fas fa-plus"></i> ADD';
+  document.getElementById('ao-ins-btn').className='ao-add'; document.getElementById('ao-ins-btn').innerHTML='<i class="fas fa-plus"></i> ADD';
+  document.getElementById('ao-acc-item').classList.remove('active');
+  document.getElementById('ao-ins-item').classList.remove('active');
+  calcTotal(); goTo('addons-page');
+}
+
+function toggleAddon(t){
+  if(t==='acc'){
+    accBooster=!accBooster;
+    const b=document.getElementById('ao-acc-btn'), i=document.getElementById('ao-acc-item');
+    if(accBooster){b.className='ao-add on';b.innerHTML='<i class="fas fa-check"></i> ADDED';i.classList.add('active');}
+    else{b.className='ao-add';b.innerHTML='<i class="fas fa-plus"></i> ADD';i.classList.remove('active');}
+  } else {
+    insActive=!insActive;
+    const b=document.getElementById('ao-ins-btn'), i=document.getElementById('ao-ins-item');
+    if(insActive){b.className='ao-add on';b.innerHTML='<i class="fas fa-check"></i> ADDED';i.classList.add('active');}
+    else{b.className='ao-add';b.innerHTML='<i class="fas fa-plus"></i> ADD';i.classList.remove('active');}
+  }
+  calcTotal();
+}
+
+function skipAddon(t){
+  if(t==='acc'){accBooster=false;document.getElementById('ao-acc-btn').className='ao-add';document.getElementById('ao-acc-btn').innerHTML='<i class="fas fa-plus"></i> ADD';document.getElementById('ao-acc-item').classList.remove('active');}
+  else{insActive=false;document.getElementById('ao-ins-btn').className='ao-add';document.getElementById('ao-ins-btn').innerHTML='<i class="fas fa-plus"></i> ADD';document.getElementById('ao-ins-item').classList.remove('active');}
+  calcTotal();
+}
+
+function calcTotal(){totalPay=basePrice+(accBooster?accPrice:0)+(insActive?insPrice:0);document.getElementById('ao-total').textContent=`₹${totalPay}`;}
+
+function showPayment(){
+  const cfg=TARGETS[targetKey];
+  document.getElementById('ps-target').textContent=`${targetKey.replace('-',' → ₹')} — ₹${basePrice}`;
+  const ar=document.getElementById('ps-acc-row'), ir=document.getElementById('ps-ins-row');
+  ar.style.display=accBooster?'flex':'none'; if(accBooster)document.getElementById('ps-acc').textContent=`₹${accPrice}`;
+  ir.style.display=insActive?'flex':'none'; if(insActive)document.getElementById('ps-ins').textContent=`₹${insPrice}`;
+  document.getElementById('ps-total').textContent=`₹${totalPay}`;
+  document.getElementById('pay-amt-big').textContent=`Pay ₹${totalPay}`;
+  document.getElementById('pay-amt-inline').textContent=`₹${totalPay}`;
+  goTo('payment-page');
+}
+
+function submitPay(){
+  const utr=document.getElementById('utr-inp').value.trim();
+  if(!utr||utr.length<10){alert('Valid UTR required (min 10 digits)');return;}
+  payId='pr5_'+Date.now();
+  DB.ref('admin_payments/'+payId).set({userId,platform,target:targetKey,amount:totalPay,basePrice,accuracyBooster:accBooster,insurance:insActive,boosterPrice:accBooster?accPrice:0,insurancePrice:insActive?insPrice:0,utr,status:'pending',timestamp:Date.now()})
+    .then(()=>{
+      document.getElementById('utr-inp').value='';
+      document.getElementById('approval-box').classList.add('show');
+      startApprovalCD(300);
+      checkApproval();
+    }).catch(()=>alert('Error. Please try again.'));
+}
+
+function startApprovalCD(sec){
+  let s=sec;
+  const el=document.getElementById('approval-cd');
+  const iv=setInterval(()=>{
+    s--; if(s<0){clearInterval(iv);return;}
+    if(el)el.textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+  },1000);
+}
+
+function checkApproval(){
+  const iv=setInterval(()=>{
+    DB.ref('admin_payments/'+payId).once('value').then(s=>{
+      const r=s.val();
+      if(r?.status==='approved'){clearInterval(iv);startSession();}
+      else if(r?.status==='rejected'){clearInterval(iv);alert('Payment rejected. Contact support.');}
+    });
+  },10000);
+}
+
+function openSupport(){window.open('https://t.me/Predict450','_blank');}
+
+function startSession(){
+  const cfg=TARGETS[targetKey];
+  balance=cfg.start; targetGoal=cfg.target; origBal=balance;
+  lvl=1; consecLosses=0; lastPred=null; lastActual=null;
+  history=[]; wins=0; losses=0; totalP=0;
+  manipMemory=[]; learnWeights={RED:1,GREEN:1,BIG:1,SMALL:1}; aiLog=[];
+
+  document.getElementById('tgt-goal').textContent=`Target: ₹${cfg.start} → ₹${cfg.target}`;
+  document.getElementById('st-bal').textContent=`₹${balance}`;
+  const bg=document.getElementById('tgt-badges'); let bh='';
+  if(accBooster)bh+='<div class="tbadge tbadge-acc"><i class="fas fa-bolt"></i> 90% ACC</div>';
+  if(insActive)bh+='<div class="tbadge tbadge-ins"><i class="fas fa-shield-alt"></i> INSURED</div>';
+  bg.innerHTML=bh;
+  updateBets();
+  ['landing-page','target-page','addons-page','payment-page'].forEach(p=>document.getElementById(p).style.display='none');
+  document.getElementById('prediction-page').style.display='block';
+  startCD(); startPredictor();
+}
+
+function goHome(){
+  document.getElementById('prediction-page').style.display='none';
+  document.getElementById('popup-win').style.display='none';
+  document.getElementById('popup-lose').style.display='none';
+  goTo('target-page');
+  DB.ref('sessions/'+userId).remove();
+}
+
+function showWin(){
+  document.getElementById('win-amount').textContent=targetGoal;
+  if(insActive)document.getElementById('ins-refund-msg').style.display='block';
+  document.getElementById('popup-win').style.display='flex';
+  DB.ref('sessions/'+userId).remove();
+}
+
+function showLose(){
+  const cfg=TARGETS[targetKey], disc=Math.floor(basePrice/2), ref=cfg.start+basePrice;
+  const t=document.getElementById('lose-title'), m=document.getElementById('lose-msg'), b=document.getElementById('lose-btn');
+  if(insActive){
+    t.textContent='INSURANCE ACTIVATED!';
+    m.innerHTML=`<p>Your insurance protects you!</p><p style="color:var(--PK);margin-top:12px;font-size:1.2rem;">₹${ref} Refund Approved!</p><p style="font-size:.82rem;color:#888;margin-top:8px;">Deposit ₹${cfg.start} + Fee ₹${basePrice} = ₹${ref}</p>`;
+    b.textContent='CLAIM REFUND';
+  } else {
+    t.textContent='TARGET MISSED!';
+    m.innerHTML=`<p>Balance lost. Don't give up!</p><p style="color:var(--GOLD);margin-top:10px;">50% Discount on Next Target</p><p style="color:var(--G);font-size:1.1rem;margin-top:6px;">Only ₹${disc} instead of ₹${basePrice}</p>`;
+    b.textContent='TRY AGAIN — 50% OFF';
+  }
+  document.getElementById('popup-lose').style.display='flex';
+}
+
+/* ════════════════════════════════════════════════════════════
+   ON LOAD
+════════════════════════════════════════════════════════════ */
+window.onload=function(){
+  fetchAPI();
+  DB.ref('sessions/'+userId).once('value').then(snap=>{
+    const s=snap.val();
+    if(s?.status==='active'&&Date.now()-s.startedAt<86400000){
+      DB.ref('admin_payments').orderByChild('userId').equalTo(userId).once('value').then(ps=>{
+        let ok=false; ps.forEach(p=>{if(p.val().status==='approved')ok=true;});
+        if(ok){
+          platform=s.platform; targetKey=s.target;
+          balance=s.currentBalance; targetGoal=s.targetAmount;
+          accBooster=s.accuracyBooster||false; insActive=s.insurance||false;
+          origBal=balance;
+          const cfg=TARGETS[targetKey];
+          document.getElementById('tgt-goal').textContent=`Target: ₹${cfg?.start} → ₹${targetGoal}`;
+          document.getElementById('st-bal').textContent=`₹${balance}`;
+          updateBets();
+          document.getElementById('landing-page').style.display='none';
+          document.getElementById('prediction-page').style.display='block';
+          startPredictor();
+        } else {
+          goTo('landing-page');
+          DB.ref('sessions/'+userId).remove();
+        }
+      });
+    } else goTo('landing-page');
+  }).catch(()=>goTo('landing-page'));
+};
+document.getElementById('utr-inp').addEventListener('keypress',e=>{if(e.key==='Enter')submitPay();});
+</script>
+</body>
+</html>
