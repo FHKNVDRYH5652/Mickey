@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mickey X Web — Ultra Pro Predictor v6.0</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+<style>
+:root{
+  --P:#bc13fe;--PG:#d670ff;--BG:#050505;--CB:rgba(15,0,35,.85);
+  --G:#00ff88;--R:#ff3355;--GOLD:#ffd700;--B:#00d4ff;
+  --OR:#ff9900;--V:#9d00ff;--T:#00ffcc;--PK:#ff00aa;
+  --glass:rgba(255,255,255,.04);--border:rgba(188,19,254,.35);
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Rajdhani',sans-serif;-webkit-user-select:none;user-select:none;}
+html,body{background:var(--BG);color:#fff;overflow-x:hidden;min-height:100vh;}
+#pg{position:fixed;width:100%;height:100%;z-index:-2;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--P);border-radius:2px;}
+::-webkit-scrollbar-track{background:rgba(0,0,0,.3);}
+#matrix-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;opacity:.07;pointer-events:none;}
+.page{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:20px;position:relative;}
+.back-btn{position:absolute;top:20px;left:20px;color:var(--P);cursor:pointer;font-size:1.4rem;z-index:10;background:rgba(188,19,254,.15);width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--P);transition:.3s;}
+.back-btn:hover{background:rgba(188,19,254,.35);box-shadow:0 0 15px var(--P);}
+.glow-btn{background:linear-gradient(45deg,var(--P),#7700cc);color:#fff;border:none;padding:14px 28px;border-radius:10px;font-weight:700;cursor:pointer;transition:.3s;font-size:1rem;letter-spacing:.5px;}
+.glow-btn:hover{box-shadow:0 0 25px var(--P);transform:translateY(-2px);}
+.neon-border{border:1.5px solid var(--P);border-radius:16px;background:var(--CB);}
+
+/* ═══ LANDING ═══ */
+#landing-page{display:flex;}
+.hero-banner{text-align:center;margin-bottom:24px;position:relative;}
+.hero-logo{font-family:'Orbitron',sans-serif;font-size:2rem;color:var(--P);text-shadow:0 0 20px var(--P),0 0 60px rgba(188,19,254,.4);letter-spacing:2px;}
+.hero-sub{font-size:.85rem;color:#888;margin-top:4px;letter-spacing:1px;}
+.hero-version{display:inline-block;background:linear-gradient(45deg,var(--P),var(--T));color:#000;font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:8px;letter-spacing:1px;}
+.live-strip{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;}
+.ls-card{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 18px;text-align:center;min-width:90px;}
+.ls-val{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;}
+.ls-lbl{font-size:.6rem;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+
+/* ═══ PLATFORM SECTION ADVANCED ═══ */
+.p-scroll-wrap{width:100%;max-width:1100px;position:relative;}
+.p-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;}
+.p-scroll-title{font-size:.8rem;color:#888;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:6px;}
+.p-search-wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.p-search{background:rgba(255,255,255,.06);border:1px solid rgba(188,19,254,.3);color:#fff;padding:7px 14px;border-radius:8px;font-size:.8rem;outline:none;width:160px;transition:.3s;}
+.p-search:focus{border-color:var(--P);box-shadow:0 0 10px rgba(188,19,254,.2);}
+.p-search::placeholder{color:#444;}
+.p-filter-tabs{display:flex;gap:6px;}
+.p-ftab{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);color:#666;padding:5px 12px;border-radius:6px;font-size:.7rem;font-weight:700;cursor:pointer;transition:.3s;}
+.p-ftab.active,.p-ftab:hover{background:rgba(188,19,254,.2);border-color:var(--P);color:var(--P);}
+.p-scroller{display:flex;overflow-x:auto;gap:16px;padding:10px 8px 20px;scroll-behavior:smooth;scrollbar-width:none;}
+.p-scroller::-webkit-scrollbar{display:none;}
+.p-card{flex:0 0 200px;height:310px;border-radius:20px;position:relative;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:.35s;background:rgba(20,0,40,.6);}
+.p-card::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(0,0,0,.95) 100%);z-index:1;transition:.3s;}
+.p-card:hover{transform:translateY(-8px) scale(1.03);border-color:var(--P);box-shadow:0 15px 40px rgba(188,19,254,.35);}
+.p-card.selected{border-color:var(--GOLD);box-shadow:0 0 30px rgba(255,215,0,.3);}
+.p-card img{width:100%;height:100%;object-fit:cover;}
+.p-card-label{position:absolute;bottom:0;left:0;right:0;z-index:2;padding:12px;text-align:center;}
+.p-card-name{font-weight:700;font-size:1rem;text-shadow:0 0 10px #000;}
+.p-card-badge{display:inline-block;background:linear-gradient(45deg,var(--G),var(--T));color:#000;font-size:.55rem;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:3px;letter-spacing:.5px;}
+.p-card-ribbon{position:absolute;top:12px;right:-28px;background:var(--GOLD);color:#000;font-size:.6rem;font-weight:700;padding:4px 35px;transform:rotate(40deg);z-index:3;letter-spacing:.5px;}
+/* Platform stats overlay on hover */
+.p-card-stats{position:absolute;top:10px;left:10px;z-index:3;display:flex;flex-direction:column;gap:4px;}
+.p-stat-badge{background:rgba(0,0,0,.75);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:3px 8px;font-size:.58rem;font-weight:700;display:flex;align-items:center;gap:4px;backdrop-filter:blur(4px);}
+.p-stat-badge .dot{width:5px;height:5px;border-radius:50%;animation:ldot 1s infinite;}
+.p-card[data-filter]{transition:.3s;}
+
+/* Selected platform indicator */
+.platform-selected-bar{display:none;background:linear-gradient(90deg,rgba(188,19,254,.15),rgba(0,255,136,.1),rgba(188,19,254,.15));border:1px solid rgba(188,19,254,.3);border-radius:10px;padding:10px 16px;margin-bottom:12px;text-align:center;font-size:.82rem;color:var(--T);font-weight:700;width:100%;max-width:1100px;}
+.platform-selected-bar.show{display:block;}
+
+.wins-ticker{width:100%;max-width:1100px;background:rgba(0,0,0,.5);border:1px solid rgba(0,255,136,.2);border-radius:10px;padding:8px 16px;margin-top:16px;overflow:hidden;display:flex;align-items:center;gap:10px;}
+.ticker-label{color:var(--G);font-size:.7rem;font-weight:700;white-space:nowrap;}
+.ticker-content{font-size:.72rem;color:#aaa;white-space:nowrap;animation:ticker-scroll 25s linear infinite;}
+@keyframes ticker-scroll{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+
+/* ═══ TARGET PAGE — ADVANCED ═══ */
+#target-page{padding-top:70px;}
+.page-title{font-family:'Orbitron',sans-serif;font-size:1.6rem;color:var(--P);text-shadow:0 0 12px var(--P);margin-bottom:6px;text-align:center;}
+.page-subtitle{font-size:.8rem;color:#666;text-align:center;margin-bottom:16px;letter-spacing:.5px;}
+
+/* Plan toolbar */
+.plan-toolbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;}
+.plan-sort-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#888;padding:6px 14px;border-radius:8px;font-size:.72rem;font-weight:700;cursor:pointer;transition:.3s;}
+.plan-sort-btn.active{background:rgba(188,19,254,.2);border-color:var(--P);color:var(--P);}
+.plan-deal-bar{background:linear-gradient(90deg,rgba(255,153,0,.1),rgba(255,215,0,.1));border:1px solid rgba(255,215,0,.3);border-radius:10px;padding:8px 16px;text-align:center;font-size:.78rem;color:var(--GOLD);font-weight:700;margin-bottom:16px;width:100%;max-width:960px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.deal-cd{font-family:'Orbitron',sans-serif;color:var(--R);font-size:.9rem;}
+
+.target-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;width:100%;max-width:960px;padding:0 10px;}
+.t-card{background:linear-gradient(135deg,rgba(20,0,50,.9),rgba(50,0,100,.8));border:1.5px solid rgba(188,19,254,.3);border-radius:18px;padding:22px;text-align:center;transition:.3s;cursor:pointer;position:relative;overflow:hidden;}
+.t-card:hover{border-color:var(--GOLD);box-shadow:0 8px 30px rgba(255,215,0,.2);transform:translateY(-4px);}
+.t-range{font-size:1.3rem;font-weight:700;color:var(--GOLD);margin-bottom:4px;text-shadow:0 0 8px rgba(255,215,0,.5);}
+.t-profit{font-size:.75rem;color:var(--G);margin-bottom:6px;}
+.t-price{font-size:1.6rem;font-weight:900;color:var(--P);margin:8px 0;}
+.t-desc{font-size:.8rem;color:#777;margin-bottom:12px;}
+.t-features{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;}
+.t-feat{background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.2);color:var(--G);font-size:.6rem;padding:3px 8px;border-radius:8px;}
+/* ROI bar */
+.t-roi-bar{background:rgba(0,0,0,.3);border-radius:6px;height:6px;overflow:hidden;margin-bottom:10px;}
+.t-roi-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--G),var(--T));transition:width 1s ease;}
+.t-roi-lbl{font-size:.65rem;color:#555;text-align:right;margin-top:2px;margin-bottom:8px;}
+/* Users count */
+.t-users{font-size:.68rem;color:#555;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:4px;}
+.t-users .u-dot{width:5px;height:5px;border-radius:50%;background:var(--G);animation:ldot 1s infinite;}
+.t-select{background:linear-gradient(45deg,var(--P),#7700cc);color:#fff;border:none;padding:11px 22px;border-radius:8px;font-weight:700;cursor:pointer;width:100%;transition:.3s;font-size:.95rem;}
+.t-select:hover{box-shadow:0 0 20px var(--P);}
+.t-popular{position:absolute;top:0;right:0;background:linear-gradient(45deg,var(--OR),#ff6600);color:#fff;font-size:.6rem;font-weight:700;padding:5px 12px;border-radius:0 18px 0 12px;letter-spacing:.5px;}
+
+/* Compare button */
+.compare-toggle{background:rgba(0,212,255,.08);border:1px solid rgba(0,212,255,.25);color:var(--B);padding:8px 20px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;transition:.3s;margin-bottom:12px;}
+.compare-toggle:hover{background:rgba(0,212,255,.15);}
+
+/* ═══ ADDONS PAGE ═══ */
+.addons-wrap{background:var(--CB);border:1.5px solid var(--border);border-radius:24px;padding:28px;max-width:480px;width:92%;}
+.ao-title{color:var(--GOLD);font-family:'Orbitron',sans-serif;font-size:1.5rem;margin-bottom:6px;text-align:center;}
+.ao-sub{font-size:.75rem;color:#666;text-align:center;margin-bottom:20px;}
+.ao-target-chip{background:rgba(188,19,254,.15);border:1px solid var(--P);border-radius:10px;padding:10px;text-align:center;margin-bottom:18px;}
+.ao-target-chip span{font-size:1.2rem;color:var(--GOLD);font-weight:700;}
+.ao-item{background:linear-gradient(135deg,rgba(30,0,60,.8),rgba(60,0,120,.7));border:1.5px solid rgba(0,255,204,.3);border-radius:14px;padding:18px;margin-bottom:14px;transition:.3s;}
+.ao-item.active{border-color:var(--GOLD);background:linear-gradient(135deg,rgba(50,0,100,.9),rgba(80,0,160,.8));}
+.ao-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.ao-name{font-weight:700;font-size:1.05rem;color:var(--T);}
+.ao-price{font-size:1.2rem;font-weight:700;color:var(--GOLD);}
+.ao-desc{font-size:.8rem;color:#999;margin-bottom:10px;}
+.ao-points{display:flex;flex-direction:column;gap:3px;margin-bottom:12px;}
+.ao-point{font-size:.78rem;color:var(--G);}
+.ao-btns{display:flex;gap:8px;}
+.ao-add{background:linear-gradient(45deg,var(--T),#00aacc);color:#000;border:none;padding:8px 18px;border-radius:7px;font-weight:700;cursor:pointer;flex:1;transition:.3s;}
+.ao-add.on{background:linear-gradient(45deg,var(--R),#cc0033);}
+.ao-skip{background:transparent;color:#555;border:1px solid #333;padding:8px 14px;border-radius:7px;font-weight:700;cursor:pointer;transition:.3s;font-size:.8rem;}
+.ao-skip:hover{border-color:#666;color:#888;}
+.ao-total{background:rgba(0,0,0,.5);border:1.5px solid var(--GOLD);border-radius:12px;padding:16px;text-align:center;margin:16px 0;}
+.ao-total-label{font-size:.8rem;color:#888;}
+.ao-total-val{font-size:1.8rem;font-weight:700;color:var(--G);margin-top:4px;}
+.ao-proceed{background:linear-gradient(45deg,var(--P),#7700cc);color:#fff;border:none;padding:14px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;font-size:1rem;letter-spacing:.5px;transition:.3s;}
+.ao-proceed:hover{box-shadow:0 0 25px var(--P);}
+
+/* ═══ PAYMENT PAGE — ADVANCED ═══ */
+.pay-wrap{background:var(--CB);border:1.5px solid var(--border);border-radius:24px;padding:28px;max-width:480px;width:92%;text-align:center;}
+.pay-title{color:var(--GOLD);font-family:'Orbitron',sans-serif;font-size:1.5rem;margin-bottom:4px;}
+.pay-sub{font-size:.75rem;color:#666;margin-bottom:16px;}
+
+/* Progress steps */
+.pay-steps{display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:18px;}
+.pay-step{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.ps-circle{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;border:2px solid rgba(255,255,255,.1);background:rgba(0,0,0,.5);color:#555;transition:.3s;}
+.ps-circle.done{background:var(--G);border-color:var(--G);color:#000;}
+.ps-circle.active{background:var(--P);border-color:var(--P);color:#fff;box-shadow:0 0 10px var(--P);}
+.ps-lbl{font-size:.55rem;color:#555;text-transform:uppercase;}
+.pay-step.done .ps-lbl,.pay-step.active .ps-lbl{color:#aaa;}
+.ps-line{width:36px;height:2px;background:rgba(255,255,255,.08);margin-bottom:15px;}
+.ps-line.done{background:var(--G);}
+
+.pay-secure-badges{display:flex;gap:8px;justify-content:center;margin-bottom:14px;flex-wrap:wrap;}
+.sec-badge{background:rgba(0,255,136,.08);border:1px solid rgba(0,255,136,.2);color:var(--G);font-size:.62rem;padding:4px 10px;border-radius:8px;display:flex;align-items:center;gap:4px;}
+.pay-summary{background:rgba(0,0,0,.4);border:1px solid rgba(188,19,254,.2);border-radius:12px;padding:14px;margin-bottom:14px;text-align:left;}
+.pay-sum-row{display:flex;justify-content:space-between;font-size:.82rem;margin-bottom:4px;}
+.pay-sum-row:last-child{border-top:1px solid rgba(255,255,255,.08);padding-top:8px;margin-top:4px;font-weight:700;font-size:.95rem;}
+.qr-box{background:#fff;padding:14px;border-radius:14px;display:inline-block;margin:12px 0;box-shadow:0 0 30px rgba(188,19,254,.3);position:relative;}
+.qr-box img{width:170px;height:170px;display:block;}
+.qr-shine{position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shine 2.5s infinite;}
+@keyframes shine{0%{left:-100%}100%{left:200%}}
+.pay-upi-id{background:rgba(0,255,136,.07);border:1px solid rgba(0,255,136,.2);border-radius:8px;padding:8px 14px;font-size:.78rem;color:var(--G);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.upi-copy-btn{background:rgba(0,255,136,.15);border:none;color:var(--G);padding:3px 8px;border-radius:5px;font-size:.65rem;cursor:pointer;font-weight:700;}
+.pay-amount-big{font-family:'Orbitron',sans-serif;font-size:2rem;color:var(--G);font-weight:700;margin:6px 0;text-shadow:0 0 15px var(--G);}
+.pay-instructions{background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.2);border-radius:10px;padding:12px;font-size:.8rem;text-align:left;margin-bottom:12px;}
+.pay-instr-step{display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;color:#bbb;}
+.pay-instr-step .step-num{background:var(--P);color:#fff;font-size:.65rem;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.utr-input{width:100%;padding:14px;margin:10px 0;background:rgba(255,255,255,.06);border:1.5px solid rgba(188,19,254,.4);color:#fff;border-radius:10px;text-align:center;font-size:1rem;outline:none;transition:.3s;}
+.utr-input:focus{border-color:var(--P);box-shadow:0 0 15px rgba(188,19,254,.25);}
+.utr-input::placeholder{color:#555;}
+.utr-input:disabled{opacity:.5;cursor:not-allowed;}
+.pay-submit{background:linear-gradient(45deg,#00cc55,#009933);color:#fff;border:none;padding:14px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;margin:6px 0;font-size:1rem;transition:.3s;letter-spacing:.5px;}
+.pay-submit:hover{box-shadow:0 0 25px #00cc55;}
+.pay-submit:disabled{opacity:.5;cursor:not-allowed;}
+
+/* Advanced approval box */
+.approval-box{display:none;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.25);border-radius:14px;padding:18px;margin:10px 0;text-align:center;}
+.approval-box.show{display:block;}
+.approval-status-bar{background:rgba(0,0,0,.4);border-radius:8px;height:8px;overflow:hidden;margin:12px 0;}
+.approval-status-fill{height:100%;border-radius:8px;background:linear-gradient(90deg,var(--B),var(--P));animation:progress-pulse 2s ease-in-out infinite;width:60%;}
+@keyframes progress-pulse{0%,100%{width:40%}50%{width:80%}}
+.approval-spinner{font-size:1.8rem;animation:spin 2s linear infinite;display:block;margin-bottom:6px;}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.approval-timer{font-family:'Orbitron',sans-serif;font-size:1.4rem;color:var(--B);font-weight:700;}
+.approval-msg{font-size:.78rem;color:#888;margin-top:4px;}
+.approval-step-lbl{font-size:.7rem;color:var(--T);margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px;}
+.approval-step-lbl::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--T);animation:ldot 1s infinite;}
+
+.pay-support{background:linear-gradient(45deg,#229954,#1a7a42);color:#fff;border:none;padding:12px;border-radius:10px;font-weight:700;cursor:pointer;width:100%;margin:4px 0;display:flex;align-items:center;justify-content:center;gap:8px;font-size:.9rem;transition:.3s;}
+.pay-support:hover{box-shadow:0 0 20px rgba(34,153,84,.5);}
+.pay-note{font-size:.72rem;color:#555;margin-top:10px;}
+
+/* ═══ PREDICTION PAGE ═══ */
+#prediction-page{display:none;min-height:100vh;padding:16px;}
+.app-wrap{max-width:480px;margin:0 auto;border:2px solid var(--P);border-radius:28px;padding:18px;background:rgba(0,0,0,.96);min-height:90vh;position:relative;box-shadow:0 0 30px rgba(188,19,254,.3);}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.tb-home{color:var(--P);cursor:pointer;font-size:1.2rem;background:rgba(188,19,254,.12);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--P);}
+.tb-home:hover{background:rgba(188,19,254,.3);}
+.tb-live{display:flex;align-items:center;gap:5px;}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--G);animation:ldot 1s infinite;}
+@keyframes ldot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+.live-lbl{color:var(--G);font-size:.75rem;font-weight:700;}
+.tb-sound{color:var(--P);cursor:pointer;background:rgba(188,19,254,.12);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--P);font-size:.9rem;}
+.tgt-header{background:linear-gradient(90deg,#5500aa,#bc13fe,#5500aa);background-size:200%;animation:glow-bg 3s infinite linear;border-radius:14px;padding:14px;text-align:center;margin-bottom:14px;border:1.5px solid var(--GOLD);}
+@keyframes glow-bg{0%{background-position:0%}100%{background-position:200%}}
+.tgt-goal{font-size:1.2rem;font-weight:700;}
+.tgt-badges{display:flex;gap:8px;justify-content:center;margin-top:8px;}
+.tbadge{padding:3px 10px;border-radius:10px;font-size:.65rem;font-weight:700;}
+.tbadge-acc{background:var(--T);color:#000;}
+.tbadge-ins{background:var(--PK);color:#fff;}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.st-box{background:var(--glass);border:1px solid var(--border);border-radius:10px;padding:10px 5px;text-align:center;}
+.st-val{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;}
+.st-lbl{font-size:.6rem;color:#666;margin-top:2px;text-transform:uppercase;letter-spacing:.3px;}
+.cd-box{background:linear-gradient(135deg,rgba(0,15,35,.9),rgba(0,30,60,.9));border:1.5px solid var(--B);border-radius:14px;padding:10px;text-align:center;margin-bottom:12px;}
+.cd-lbl{font-size:.7rem;color:var(--B);margin-bottom:2px;letter-spacing:.5px;}
+.cd-val{font-family:'Orbitron',sans-serif;font-size:1.7rem;color:var(--GOLD);font-weight:700;letter-spacing:5px;text-shadow:0 0 10px var(--GOLD);}
+.cd-val.urgent{color:var(--R);text-shadow:0 0 10px var(--R);animation:urg .5s infinite;}
+@keyframes urg{0%,100%{opacity:1}50%{opacity:.4}}
+.cd-period{font-size:.65rem;color:#555;margin-top:2px;}
+.mr-wrap{background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.06);border-radius:10px;padding:10px;margin-bottom:10px;}
+.mr-lbl{font-size:.65rem;color:#555;margin-bottom:6px;letter-spacing:.5px;}
+.mr-chips{display:flex;gap:4px;flex-wrap:wrap;}
+.mr-chip{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;}
+.mr-chip.r{background:rgba(255,51,85,.2);color:#ff3355;border:1px solid #ff3355;}
+.mr-chip.g{background:rgba(0,255,136,.15);color:#00ff88;border:1px solid #00ff88;}
+.mr-chip.v{background:rgba(157,0,255,.2);color:#bb44ff;border:1px solid #9d00ff;}
+.manip-panel{background:linear-gradient(135deg,rgba(0,5,20,.95),rgba(0,10,30,.95));border:1.5px solid rgba(0,212,255,.3);border-radius:15px;padding:14px;margin-bottom:10px;}
+.manip-title{font-size:.78rem;color:var(--B);font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.manip-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.m-card{background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:8px;}
+.m-card.highlight{border-color:var(--OR)!important;background:rgba(255,153,0,.07);}
+.m-card.danger{border-color:var(--R)!important;background:rgba(255,51,85,.07);}
+.mc-label{font-size:.6rem;color:#555;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
+.mc-val{font-size:.82rem;font-weight:700;}
+.mc-tag{display:inline-block;font-size:.58rem;font-weight:700;padding:2px 7px;border-radius:8px;margin-top:3px;}
+.mc-tag.safe{background:rgba(0,255,136,.15);color:var(--G);}
+.mc-tag.warn{background:rgba(255,153,0,.15);color:var(--OR);animation:tw 1s infinite;}
+.mc-tag.crit{background:rgba(255,51,85,.15);color:var(--R);animation:tw .5s infinite;}
+@keyframes tw{0%,100%{opacity:1}50%{opacity:.3}}
+.manip-alert{background:rgba(255,153,0,.08);border:1px solid rgba(255,153,0,.25);border-radius:8px;padding:8px;font-size:.7rem;color:#aaa;}
+.manip-alert strong{color:var(--OR);}
+.prob-panel{background:rgba(0,0,0,.5);border:1px solid rgba(188,19,254,.2);border-radius:12px;padding:12px;margin-bottom:10px;}
+.prob-title{font-size:.75rem;color:var(--P);font-weight:700;margin-bottom:10px;}
+.pb-row{display:flex;align-items:center;margin-bottom:7px;}
+.pb-lbl{font-size:.75rem;min-width:58px;font-weight:600;}
+.pb-wrap{flex:1;height:10px;background:rgba(255,255,255,.05);border-radius:5px;overflow:hidden;margin:0 8px;position:relative;}
+.pb-fill{height:100%;border-radius:5px;transition:width .8s ease;}
+.pb-fill.r{background:linear-gradient(90deg,#990022,#ff3355);}
+.pb-fill.g{background:linear-gradient(90deg,#006633,#00ff88);}
+.pb-fill.v{background:linear-gradient(90deg,#440088,#aa00ff);}
+.pb-fill.b{background:linear-gradient(90deg,#886600,#ffd700);}
+.pb-fill.s{background:linear-gradient(90deg,#003399,#00aaff);}
+.pb-pct{font-size:.72rem;font-weight:700;min-width:36px;text-align:right;}
+.pb-crown{font-size:.75rem;margin-left:3px;}
+.pred-main{background:var(--glass);border:2px solid var(--P);border-radius:18px;padding:22px;text-align:center;margin-bottom:10px;position:relative;overflow:hidden;}
+.pred-main::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(188,19,254,.1) 0%,transparent 70%);pointer-events:none;}
+.pred-tag{font-size:.78rem;color:#666;margin-bottom:4px;letter-spacing:.5px;}
+.pred-val{font-size:3.5rem;font-weight:900;font-family:'Orbitron',sans-serif;text-transform:uppercase;margin:6px 0;line-height:1;}
+@keyframes pf{0%{transform:scale(.7);opacity:0;filter:blur(8px)}70%{transform:scale(1.08);opacity:1;filter:blur(0)}100%{transform:scale(1)}}
+.pred-flash{animation:pf .5s ease forwards;}
+.pred-type{color:var(--P);font-size:1rem;margin-bottom:10px;font-weight:600;}
+.conf-box{background:rgba(0,0,0,.4);border:1px solid rgba(188,19,254,.2);border-radius:10px;padding:10px;margin:8px 0;}
+.conf-lbl{font-size:.72rem;color:#555;text-align:center;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.conf-track{background:rgba(255,255,255,.05);border-radius:10px;height:12px;overflow:hidden;}
+.conf-bar{height:100%;border-radius:10px;transition:width .9s ease;}
+.conf-text{text-align:center;font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;margin-top:5px;}
+.streak-bar{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.3);border-radius:8px;padding:7px 12px;margin:6px 0;border:1px solid rgba(255,255,255,.04);}
+.streak-t{font-size:.82rem;font-weight:700;}
+.streak-t.w{color:var(--G);}
+.streak-t.l{color:var(--R);}
+.bet-display{font-size:1.4rem;color:var(--GOLD);font-weight:700;margin:10px 0;text-align:center;}
+.levels-row{display:flex;gap:8px;margin:8px 0;}
+.lv{flex:1;padding:10px 6px;border-radius:10px;text-align:center;background:rgba(0,0,0,.4);border:1px solid rgba(188,19,254,.2);transition:.3s;}
+.lv.active{border-color:var(--GOLD);background:rgba(255,215,0,.08);box-shadow:0 0 10px rgba(255,215,0,.15);}
+.lv-n{font-size:1rem;font-weight:700;}
+.lv-p{font-size:.75rem;color:#666;}
+.lv-a{font-size:.95rem;color:var(--G);font-weight:700;margin-top:2px;}
+.hc-panel{background:rgba(0,0,0,.4);border:1px solid rgba(188,19,254,.15);border-radius:10px;padding:10px;margin:8px 0;}
+.hc-title{font-size:.72rem;color:var(--P);font-weight:700;margin-bottom:7px;}
+.hc-chips{display:flex;gap:5px;flex-wrap:wrap;}
+.hc-chip{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;border:2px solid;}
+.hc-chip.hot{background:rgba(255,51,85,.15);border-color:#ff3355;color:#ff3355;}
+.hc-chip.cold{background:rgba(0,100,255,.15);border-color:#0066ff;color:#66aaff;}
+.hc-chip.norm{background:rgba(255,255,255,.03);border-color:#333;color:#555;}
+.ai-log{background:rgba(0,0,0,.5);border:1px solid rgba(0,212,255,.15);border-radius:10px;padding:10px;margin:8px 0;max-height:100px;overflow-y:auto;}
+.ai-log-title{font-size:.68rem;color:var(--B);font-weight:700;margin-bottom:5px;}
+.ai-log-entry{font-size:.68rem;color:#888;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;gap:6px;}
+.ai-log-entry .ai-icon{color:var(--P);flex-shrink:0;}
+.hist-panel{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:14px;margin-top:12px;max-height:280px;overflow-y:auto;}
+.hist-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.hist-title{color:var(--P);font-weight:700;font-size:.85rem;}
+.hist-item{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin-bottom:5px;background:rgba(0,0,0,.3);border-radius:7px;border-left:3px solid var(--P);}
+.hist-item.wi{border-left-color:var(--G);background:rgba(0,255,136,.04);}
+.hist-item.lo{border-left-color:var(--R);background:rgba(255,51,85,.04);}
+.hist-item.pe{border-left-color:var(--GOLD);}
+.cr{color:var(--R);}.cg{color:var(--G);}.cb{color:var(--GOLD);}.cs{color:var(--B);}.cv{color:#bb44ff;}
+.popup{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:99999;justify-content:center;align-items:center;}
+.popup-box{background:rgba(5,0,15,.97);padding:36px;border-radius:24px;text-align:center;max-width:480px;width:90%;border:2px solid;animation:pop .4s ease;}
+@keyframes pop{from{transform:scale(.8);opacity:0}to{transform:scale(1);opacity:1}}
+.popup-s{border-color:var(--G);box-shadow:0 0 50px rgba(0,255,136,.2);}
+.popup-f{border-color:var(--R);box-shadow:0 0 50px rgba(255,51,85,.2);}
+.popup-title{font-family:'Orbitron',sans-serif;font-size:1.8rem;margin-bottom:16px;}
+.popup-s .popup-title{color:var(--G);}
+.popup-f .popup-title{color:var(--R);}
+.popup-msg{font-size:1rem;margin:16px 0;color:#ccc;line-height:1.6;}
+.popup-btn{background:linear-gradient(45deg,var(--P),#7700cc);color:#fff;border:none;padding:14px 36px;border-radius:10px;font-weight:700;cursor:pointer;font-size:1rem;margin-top:12px;transition:.3s;}
+.popup-btn:hover{box-shadow:0 0 25px var(--P);}
+
+/* Toast notification */
+.toast{position:fixed;top:20px;right:20px;background:rgba(0,0,0,.9);border:1px solid var(--G);border-radius:10px;padding:12px 18px;font-size:.82rem;color:var(--G);z-index:99999;transform:translateX(200%);transition:.3s;max-width:280px;}
+.toast.show{transform:translateX(0);}
+.toast.error{border-color:var(--R);color:var(--R);}
+</style>
+</head>
+<body>
+<canvas id="matrix-canvas"></canvas>
+<div id="pg"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- POPUPS -->
+<div id="popup-win" class="popup">
+  <div class="popup-box popup-s">
+    <div class="popup-title">🏆 TARGET HIT!</div>
+    <div class="popup-msg">
+      <p>Congratulations! You reached your target successfully.</p>
+      <p style="color:var(--GOLD);font-size:1.3rem;margin-top:12px;">₹<span id="win-amount">0</span> Achieved!</p>
+      <div id="ins-refund-msg" style="display:none;color:var(--PK);margin-top:8px;font-size:.85rem;"><i class="fas fa-shield-alt"></i> Insurance unused — valid for next target!</div>
+    </div>
+    <button class="popup-btn" onclick="MXW.goHome()">BUY NEW TARGET</button>
+  </div>
+</div>
+<div id="popup-lose" class="popup">
+  <div class="popup-box popup-f">
+    <div class="popup-title" id="lose-title">TARGET LOST!</div>
+    <div class="popup-msg" id="lose-msg"></div>
+    <button class="popup-btn" onclick="MXW.goHome()" id="lose-btn">TRY AGAIN</button>
+  </div>
+</div>
+
+<!-- LANDING -->
+<section class="page" id="landing-page" style="display:flex;">
+  <div class="hero-banner">
+    <div class="hero-logo"><i class="fas fa-bolt" style="margin-right:8px;"></i>MICKEY X WEB</div>
+    <div class="hero-sub">ULTRA PRO PREDICTOR — AI POWERED</div>
+    <div class="hero-version">v6.0 MANIPULATION DETECTOR</div>
+  </div>
+  <div class="live-strip">
+    <div class="ls-card"><div class="ls-val" id="live-users" style="color:var(--G);">---</div><div class="ls-lbl">Live Users</div></div>
+    <div class="ls-card"><div class="ls-val" id="live-wins" style="color:var(--GOLD);">---</div><div class="ls-lbl">Wins Today</div></div>
+    <div class="ls-card"><div class="ls-val" style="color:var(--T);">87%</div><div class="ls-lbl">Accuracy</div></div>
+    <div class="ls-card"><div class="ls-val" style="color:var(--P);">24/7</div><div class="ls-lbl">Support</div></div>
+  </div>
+
+  <!-- Platform selected bar -->
+  <div class="platform-selected-bar" id="platform-selected-bar">
+    <i class="fas fa-check-circle" style="color:var(--G);margin-right:6px;"></i>
+    Platform Selected: <span id="selected-platform-name" style="color:var(--GOLD);margin:0 6px;">--</span>
+    <span style="color:#555;font-size:.7rem;">Click below to change</span>
+  </div>
+
+  <div class="p-scroll-wrap">
+    <div class="p-header-row">
+      <div class="p-scroll-title"><i class="fas fa-gamepad" style="color:var(--P);"></i>SELECT PLATFORM</div>
+      <div class="p-search-wrap">
+        <input class="p-search" type="text" id="platform-search" placeholder="🔍 Search platform..." oninput="MXW.filterPlatforms(this.value)">
+        <div class="p-filter-tabs">
+          <div class="p-ftab active" onclick="MXW.filterTab(this,'all')">All</div>
+          <div class="p-ftab" onclick="MXW.filterTab(this,'hot')">🔥 Hot</div>
+          <div class="p-ftab" onclick="MXW.filterTab(this,'new')">✨ New</div>
+          <div class="p-ftab" onclick="MXW.filterTab(this,'top')">⭐ Top</div>
+        </div>
+      </div>
+    </div>
+    <div class="p-scroller" id="p-scroller">
+      <!-- Platform: TASHAN -->
+      <div class="p-card" data-platform="TASHAN" data-tag="hot" onclick="MXW.openTarget('TASHAN')">
+        <div class="p-card-ribbon">HOT</div>
+        <div class="p-card-stats">
+          <div class="p-stat-badge"><span class="dot" style="background:var(--G);"></span><span style="color:var(--G);" id="pstat-TASHAN">124 Online</span></div>
+          <div class="p-stat-badge"><i class="fas fa-star" style="color:var(--GOLD);font-size:.5rem;"></i><span style="color:#aaa;">89% Win</span></div>
+        </div>
+        <img src="tashan.png" alt="TASHAN" onerror="this.style.background='linear-gradient(135deg,#1a003a,#3d007a)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.innerHTML='TASHAN';this.style.color='var(--P)';this.style.fontSize='1.2rem';this.style.fontWeight='700';">
+        <div class="p-card-label"><div class="p-card-name">TASHAN</div><div class="p-card-badge">✓ SUPPORTED</div></div>
+      </div>
+      <!-- Platform: DM WIN -->
+      <div class="p-card" data-platform="DM WIN" data-tag="all" onclick="MXW.openTarget('DM WIN')">
+        <div class="p-card-stats">
+          <div class="p-stat-badge"><span class="dot" style="background:var(--G);"></span><span style="color:var(--G);" id="pstat-DMWIN">98 Online</span></div>
+          <div class="p-stat-badge"><i class="fas fa-star" style="color:var(--GOLD);font-size:.5rem;"></i><span style="color:#aaa;">86% Win</span></div>
+        </div>
+        <img src="dmwin.png" alt="DM WIN" onerror="this.style.background='linear-gradient(135deg,#001a3a,#00397a)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.innerHTML='DM WIN';this.style.color='var(--B)';this.style.fontSize='1.2rem';this.style.fontWeight='700';">
+        <div class="p-card-label"><div class="p-card-name">DM WIN</div><div class="p-card-badge">✓ SUPPORTED</div></div>
+      </div>
+      <!-- Platform: DAMAN -->
+      <div class="p-card" data-platform="DAMAN" data-tag="top" onclick="MXW.openTarget('DAMAN')">
+        <div class="p-card-ribbon">TOP</div>
+        <div class="p-card-stats">
+          <div class="p-stat-badge"><span class="dot" style="background:var(--G);"></span><span style="color:var(--G);" id="pstat-DAMAN">211 Online</span></div>
+          <div class="p-stat-badge"><i class="fas fa-star" style="color:var(--GOLD);font-size:.5rem;"></i><span style="color:#aaa;">91% Win</span></div>
+        </div>
+        <img src="daman.png" alt="DAMAN" onerror="this.style.background='linear-gradient(135deg,#1a1a00,#3a3a00)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.innerHTML='DAMAN';this.style.color='var(--GOLD)';this.style.fontSize='1.2rem';this.style.fontWeight='700';">
+        <div class="p-card-label"><div class="p-card-name">DAMAN</div><div class="p-card-badge">✓ SUPPORTED</div></div>
+      </div>
+      <!-- Platform: JALWA -->
+      <div class="p-card" data-platform="JALWA" data-tag="all" onclick="MXW.openTarget('JALWA')">
+        <div class="p-card-stats">
+          <div class="p-stat-badge"><span class="dot" style="background:var(--G);"></span><span style="color:var(--G);" id="pstat-JALWA">76 Online</span></div>
+          <div class="p-stat-badge"><i class="fas fa-star" style="color:var(--GOLD);font-size:.5rem;"></i><span style="color:#aaa;">84% Win</span></div>
+        </div>
+        <img src="jalwa.png" alt="JALWA" onerror="this.style.background='linear-gradient(135deg,#001a1a,#003a3a)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.innerHTML='JALWA';this.style.color='var(--T)';this.style.fontSize='1.2rem';this.style.fontWeight='700';">
+        <div class="p-card-label"><div class="p-card-name">JALWA</div><div class="p-card-badge">✓ SUPPORTED</div></div>
+      </div>
+      <!-- Platform: 82 LOTTERY -->
+      <div class="p-card" data-platform="82 LOTTERY" data-tag="all" onclick="MXW.openTarget('82 LOTTERY')">
+        <div class="p-card-stats">
+          <div class="p-stat-badge"><span class="dot" style="background:var(--G);"></span><span style="color:var(--G);">63 Online</span></div>
+          <div class="p-stat-badge"><i class="fas fa-star" style="color:var(--GOLD);font-size:.5rem;"></i><span style="color:#aaa;">85% Win</span></div>
+        </div>
+        <img src="82lottery.png" alt="82 LOTTERY" onerror="this.style.background='linear-gradient(135deg,#1a001a,#3a003a)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.innerHTML='82 LOTTERY';this.style.color='var(--PK)';this.style.fontSize='1rem';this.style.fontWeight='700';">
+        <div class="p-card-label"><div class="p-card-name">82 LOTTERY</div><div class="p-card-badge">✓ SUPPORTED</div></div>
+      </div>
+      <!-- Platform: BDG GAME -->
+      <div class="p-card" data-platform="BDG GAME" data-tag="all" onclick="MXW.openTarget('BDG GAME')">
+        <div class="p-card-stats">
+          <div class="p-stat-badge"><span class="dot" style="background:var(--G);"></span><span style="color:var(--G);">87 Online</span></div>
+          <div class="p-stat-badge"><i class="fas fa-star" style="color:var(--GOLD);font-size:.5rem;"></i><span style="color:#aaa;">88% Win</span></div>
+        </div>
+        <img src="bdggame.png" alt="BDG GAME" onerror="this.style.background='linear-gradient(135deg,#001a00,#003a00)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.innerHTML='BDG GAME';this.style.color='var(--G)';this.style.fontSize='1rem';this.style.fontWeight='700';">
+        <div class="p-card-label"><div class="p-card-name">BDG GAME</div><div class="p-card-badge">✓ SUPPORTED</div></div>
+      </div>
+      <!-- Platform: GOA GAME -->
+      <div class="p-card" data-platform="GOA GAME" data-tag="all" onclick="MXW.openTarget('GOA GAME')">
+        <div class="p-card-stats">
+          <div class="p-stat-badge"><span class="dot" style="background:var(--G);"></span><span style="color:var(--G);">54 Online</span></div>
+          <div class="p-stat-badge"><i class="fas fa-star" style="color:var(--GOLD);font-size:.5rem;"></i><span style="color:#aaa;">83% Win</span></div>
+        </div>
+        <img src="goagame.png" alt="GOA GAME" onerror="this.style.background='linear-gradient(135deg,#001a0a,#003a15)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.innerHTML='GOA GAME';this.style.color='var(--G)';this.style.fontSize='1rem';this.style.fontWeight='700';">
+        <div class="p-card-label"><div class="p-card-name">GOA GAME</div><div class="p-card-badge">✓ SUPPORTED</div></div>
+      </div>
+      <!-- Platform: 91 CLUB -->
+      <div class="p-card" data-platform="91 CLUB" data-tag="new" onclick="MXW.openTarget('91 CLUB')">
+        <div class="p-card-ribbon" style="background:var(--G);color:#000;">NEW</div>
+        <div class="p-card-stats">
+          <div class="p-stat-badge"><span class="dot" style="background:var(--G);"></span><span style="color:var(--G);">142 Online</span></div>
+          <div class="p-stat-badge"><i class="fas fa-star" style="color:var(--GOLD);font-size:.5rem;"></i><span style="color:#aaa;">90% Win</span></div>
+        </div>
+        <img src="91club.png" alt="91 CLUB" onerror="this.style.background='linear-gradient(135deg,#1a0010,#3a0025)';this.style.display='flex';this.style.alignItems='center';this.style.justifyContent='center';this.innerHTML='91 CLUB';this.style.color='var(--PK)';this.style.fontSize='1rem';this.style.fontWeight='700';">
+        <div class="p-card-label"><div class="p-card-name">91 CLUB</div><div class="p-card-badge">✓ SUPPORTED</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="wins-ticker">
+    <span class="ticker-label">🏆 RECENT WINS:</span>
+    <span class="ticker-content" id="ticker-text">Loading...</span>
+  </div>
+</section>
+
+<!-- TARGET PAGE -->
+<section class="page" id="target-page">
+  <div class="back-btn" onclick="MXW.goTo('landing-page')"><i class="fas fa-arrow-left"></i></div>
+  <div class="page-title">CHOOSE YOUR PLAN</div>
+  <div class="page-subtitle" id="target-platform-sub">Select starting balance → profit goal</div>
+
+  <!-- Deal countdown bar -->
+  <div class="plan-deal-bar" style="width:100%;max-width:960px;">
+    <i class="fas fa-fire" style="color:var(--R);"></i>
+    🔥 LIMITED TIME OFFER — Extra 10% OFF ends in:
+    <span class="deal-cd" id="deal-countdown">00:00</span>
+  </div>
+
+  <!-- Plan sort toolbar -->
+  <div class="plan-toolbar">
+    <div class="plan-sort-btn active" onclick="MXW.sortPlans(this,'all')">All Plans</div>
+    <div class="plan-sort-btn" onclick="MXW.sortPlans(this,'starter')">Starter</div>
+    <div class="plan-sort-btn" onclick="MXW.sortPlans(this,'pro')">Pro</div>
+    <div class="plan-sort-btn" onclick="MXW.sortPlans(this,'vip')">VIP/Elite</div>
+  </div>
+
+  <div class="target-grid" id="target-grid">
+    <div class="t-card" data-tier="starter" onclick="MXW.selectTarget('350-1500',250)">
+      <div class="t-range">₹350 → ₹1,500</div>
+      <div class="t-profit">Profit: ₹1,150 <span style="color:var(--T);">(329% ROI)</span></div>
+      <div class="t-price">₹250</div>
+      <div class="t-roi-bar"><div class="t-roi-fill" style="width:33%;"></div></div>
+      <div class="t-roi-lbl">ROI Meter</div>
+      <div class="t-users"><span class="u-dot"></span>38 users chose this today</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">Beginner</span></div>
+      <div class="t-desc">Perfect for beginners. Low risk, steady profits.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+    <div class="t-card" data-tier="starter" style="border-color:rgba(255,215,0,.4);" onclick="MXW.selectTarget('500-3500',500)">
+      <div class="t-popular">POPULAR</div>
+      <div class="t-range">₹500 → ₹3,500</div>
+      <div class="t-profit">Profit: ₹3,000 <span style="color:var(--T);">(600% ROI)</span></div>
+      <div class="t-price">₹500</div>
+      <div class="t-roi-bar"><div class="t-roi-fill" style="width:55%;"></div></div>
+      <div class="t-roi-lbl">ROI Meter</div>
+      <div class="t-users"><span class="u-dot"></span>127 users chose this today</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">Standard</span><span class="t-feat">🔥 Best Value</span></div>
+      <div class="t-desc">Most popular choice. Great ROI in short time.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+    <div class="t-card" data-tier="pro" onclick="MXW.selectTarget('1000-10000',999)">
+      <div class="t-range">₹1,000 → ₹10,000</div>
+      <div class="t-profit">Profit: ₹9,000 <span style="color:var(--T);">(900% ROI)</span></div>
+      <div class="t-price">₹999</div>
+      <div class="t-roi-bar"><div class="t-roi-fill" style="width:65%;"></div></div>
+      <div class="t-roi-lbl">ROI Meter</div>
+      <div class="t-users"><span class="u-dot"></span>84 users chose this today</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">Advanced</span></div>
+      <div class="t-desc">10x your investment with advanced AI.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+    <div class="t-card" data-tier="pro" onclick="MXW.selectTarget('2500-25000',1500)">
+      <div class="t-range">₹2,500 → ₹25,000</div>
+      <div class="t-profit">Profit: ₹22,500 <span style="color:var(--T);">(900% ROI)</span></div>
+      <div class="t-price">₹1,500</div>
+      <div class="t-roi-bar"><div class="t-roi-fill" style="width:72%;"></div></div>
+      <div class="t-roi-lbl">ROI Meter</div>
+      <div class="t-users"><span class="u-dot"></span>56 users chose this today</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">Pro</span></div>
+      <div class="t-desc">For serious players. Big profits.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+    <div class="t-card" data-tier="pro" onclick="MXW.selectTarget('5000-50000',2500)">
+      <div class="t-range">₹5,000 → ₹50,000</div>
+      <div class="t-profit">Profit: ₹45,000 <span style="color:var(--T);">(900% ROI)</span></div>
+      <div class="t-price">₹2,500</div>
+      <div class="t-roi-bar"><div class="t-roi-fill" style="width:78%;"></div></div>
+      <div class="t-roi-lbl">ROI Meter</div>
+      <div class="t-users"><span class="u-dot"></span>29 users chose this today</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">Expert</span></div>
+      <div class="t-desc">Expert level. Maximum earning potential.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+    <div class="t-card" data-tier="vip" style="border-color:rgba(188,19,254,.5);" onclick="MXW.selectTarget('1000-35000',5000)">
+      <div class="t-popular" style="background:linear-gradient(45deg,var(--P),#7700cc);">VIP</div>
+      <div class="t-range">₹1,000 → ₹35,000</div>
+      <div class="t-profit">Profit: ₹34,000 <span style="color:var(--T);">(3400% ROI)</span></div>
+      <div class="t-price">₹5,000</div>
+      <div class="t-roi-bar"><div class="t-roi-fill" style="width:90%;background:linear-gradient(90deg,var(--P),var(--V));"></div></div>
+      <div class="t-roi-lbl">ROI Meter</div>
+      <div class="t-users"><span class="u-dot"></span>18 users chose this today</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">VIP Access</span><span class="t-feat">⚡ Priority</span></div>
+      <div class="t-desc">VIP plan. Explosive growth with AI guidance.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+    <div class="t-card" data-tier="vip" style="border-color:rgba(255,215,0,.5);" onclick="MXW.selectTarget('2000-70000',10000)">
+      <div class="t-popular" style="background:linear-gradient(45deg,var(--GOLD),#cc8800);color:#000;">ELITE</div>
+      <div class="t-range">₹2,000 → ₹70,000</div>
+      <div class="t-profit">Profit: ₹68,000 <span style="color:var(--T);">(3400% ROI)</span></div>
+      <div class="t-price">₹10,000</div>
+      <div class="t-roi-bar"><div class="t-roi-fill" style="width:98%;background:linear-gradient(90deg,var(--GOLD),var(--OR));"></div></div>
+      <div class="t-roi-lbl">ROI Meter</div>
+      <div class="t-users"><span class="u-dot"></span>7 users chose this today</div>
+      <div class="t-features"><span class="t-feat">AI Predict</span><span class="t-feat">Elite</span><span class="t-feat">👑 Premium</span></div>
+      <div class="t-desc">Elite plan for maximum wealth creation.</div>
+      <button class="t-select">SELECT →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ADDONS PAGE -->
+<section class="page" id="addons-page">
+  <div class="back-btn" onclick="MXW.goTo('target-page')"><i class="fas fa-arrow-left"></i></div>
+  <div class="addons-wrap">
+    <div class="ao-title">🚀 ADD-ONS</div>
+    <div class="ao-sub">Boost your winning chances</div>
+    <div class="ao-target-chip">Selected: <span id="ao-target-name">--</span></div>
+    <div class="ao-item" id="ao-acc-item">
+      <div class="ao-head">
+        <div class="ao-name"><i class="fas fa-bolt" style="color:var(--GOLD);margin-right:5px;"></i>90% ACCURACY BOOSTER</div>
+        <div class="ao-price" id="ao-acc-price">₹50</div>
+      </div>
+      <div class="ao-desc">Activates enhanced AI pattern scanning mode.</div>
+      <div class="ao-points">
+        <div class="ao-point"><i class="fas fa-check-circle" style="margin-right:5px;"></i>90% Prediction Accuracy</div>
+        <div class="ao-point"><i class="fas fa-check-circle" style="margin-right:5px;"></i>Deep Manipulation Analysis</div>
+        <div class="ao-point"><i class="fas fa-check-circle" style="margin-right:5px;"></i>Smart Bet Optimization</div>
+      </div>
+      <div class="ao-btns">
+        <button class="ao-skip" onclick="MXW.skipAddon('acc')">SKIP</button>
+        <button class="ao-add" id="ao-acc-btn" onclick="MXW.toggleAddon('acc')"><i class="fas fa-plus"></i> ADD</button>
+      </div>
+    </div>
+    <div class="ao-item" id="ao-ins-item">
+      <div class="ao-head">
+        <div class="ao-name"><i class="fas fa-shield-alt" style="color:var(--PK);margin-right:5px;"></i>LOSS INSURANCE</div>
+        <div class="ao-price" id="ao-ins-price">₹100</div>
+      </div>
+      <div class="ao-desc">Full money-back protection if target is missed.</div>
+      <div class="ao-points">
+        <div class="ao-point"><i class="fas fa-shield-alt" style="margin-right:5px;color:var(--PK);"></i>Full Deposit Refund</div>
+        <div class="ao-point"><i class="fas fa-shield-alt" style="margin-right:5px;color:var(--PK);"></i>Target Price Refund</div>
+        <div class="ao-point"><i class="fas fa-shield-alt" style="margin-right:5px;color:var(--PK);"></i>100% Money Back</div>
+      </div>
+      <div class="ao-btns">
+        <button class="ao-skip" onclick="MXW.skipAddon('ins')">SKIP</button>
+        <button class="ao-add" id="ao-ins-btn" onclick="MXW.toggleAddon('ins')"><i class="fas fa-plus"></i> ADD</button>
+      </div>
+    </div>
+    <div class="ao-total">
+      <div class="ao-total-label">TOTAL PAYABLE</div>
+      <div class="ao-total-val" id="ao-total">₹250</div>
+    </div>
+    <button class="ao-proceed" onclick="MXW.showPayment()"><i class="fas fa-lock" style="margin-right:8px;"></i>PROCEED TO PAYMENT</button>
+    <div style="font-size:.72rem;color:#555;margin-top:12px;text-align:center;"><i class="fas fa-info-circle"></i> Add-ons are optional</div>
+  </div>
+</section>
+
+<!-- PAYMENT PAGE -->
+<section class="page" id="payment-page">
+  <div class="back-btn" onclick="MXW.goTo('addons-page')"><i class="fas fa-arrow-left"></i></div>
+  <div class="pay-wrap">
+    <div class="pay-title">COMPLETE PAYMENT</div>
+    <div class="pay-sub">Secure payment via UPI</div>
+
+    <!-- Step progress -->
+    <div class="pay-steps">
+      <div class="pay-step done"><div class="ps-circle done"><i class="fas fa-check"></i></div><div class="ps-lbl">Plan</div></div>
+      <div class="ps-line done"></div>
+      <div class="pay-step done"><div class="ps-circle done"><i class="fas fa-check"></i></div><div class="ps-lbl">Add-ons</div></div>
+      <div class="ps-line done"></div>
+      <div class="pay-step active"><div class="ps-circle active">3</div><div class="ps-lbl">Pay</div></div>
+      <div class="ps-line"></div>
+      <div class="pay-step"><div class="ps-circle">4</div><div class="ps-lbl">Access</div></div>
+    </div>
+
+    <div class="pay-secure-badges">
+      <div class="sec-badge"><i class="fas fa-lock"></i> 100% Secure</div>
+      <div class="sec-badge"><i class="fas fa-bolt"></i> Instant Activation</div>
+      <div class="sec-badge"><i class="fas fa-shield-alt"></i> Verified</div>
+    </div>
+    <div class="pay-summary">
+      <div class="pay-sum-row"><span style="color:#888;">Platform</span><span id="ps-platform" style="color:var(--B);">--</span></div>
+      <div class="pay-sum-row"><span style="color:#888;">Target Plan</span><span id="ps-target" style="color:var(--GOLD);">--</span></div>
+      <div class="pay-sum-row" id="ps-acc-row" style="display:none;"><span style="color:#888;">Accuracy Booster</span><span id="ps-acc" style="color:var(--T);">--</span></div>
+      <div class="pay-sum-row" id="ps-ins-row" style="display:none;"><span style="color:#888;">Loss Insurance</span><span id="ps-ins" style="color:var(--PK);">--</span></div>
+      <div class="pay-sum-row"><span style="color:#fff;font-weight:700;">TOTAL</span><span id="ps-total" style="color:var(--G);font-weight:700;">--</span></div>
+    </div>
+
+    <div class="qr-box">
+      <div class="qr-shine"></div>
+      <img src="qr.png" alt="QR Code" style="display:block;">
+    </div>
+
+    <!-- UPI ID copy -->
+    <div class="pay-upi-id">
+      <span><i class="fas fa-university" style="margin-right:6px;"></i>UPI: <strong id="upi-display">mickeyx@upi</strong></span>
+      <button class="upi-copy-btn" onclick="MXW.copyUPI()"><i class="fas fa-copy"></i> COPY</button>
+    </div>
+
+    <div class="pay-amount-big" id="pay-amt-big">Pay ₹250</div>
+    <div class="pay-instructions">
+      <div class="pay-instr-step"><div class="step-num">1</div><span>Open PhonePe, GPay, or Paytm</span></div>
+      <div class="pay-instr-step"><div class="step-num">2</div><span>Scan QR or use UPI ID. Pay <strong id="pay-amt-inline" style="color:var(--GOLD);">₹250</strong> exact</span></div>
+      <div class="pay-instr-step"><div class="step-num">3</div><span>Copy the UTR/Transaction ID from payment app</span></div>
+      <div class="pay-instr-step"><div class="step-num">4</div><span>Paste below and click Submit</span></div>
+    </div>
+    <input type="number" class="utr-input" id="utr-inp" placeholder="Enter 12-digit UTR / Transaction ID" maxlength="20" oninput="MXW.validateUTR(this)">
+    <div id="utr-error" style="color:var(--R);font-size:.72rem;margin-top:-6px;margin-bottom:6px;display:none;">⚠ UTR must be at least 10 digits</div>
+    <button class="pay-submit" id="pay-submit-btn" onclick="MXW.submitPay()"><i class="fas fa-check-circle" style="margin-right:8px;"></i>SUBMIT & VERIFY PAYMENT</button>
+
+    <!-- Advanced approval box -->
+    <div class="approval-box" id="approval-box">
+      <span class="approval-spinner">⏳</span>
+      <div class="approval-timer" id="approval-cd">04:59</div>
+      <div class="approval-status-bar"><div class="approval-status-fill"></div></div>
+      <div class="approval-step-lbl" id="approval-step-lbl">Admin verifying your payment...</div>
+      <div class="approval-msg">Please wait. Do not close this page.</div>
+    </div>
+
+    <button class="pay-support" onclick="MXW.openSupport()"><i class="fab fa-telegram" style="font-size:1.1rem;"></i> Contact Support on Telegram</button>
+    <div class="pay-note"><i class="fas fa-info-circle"></i> Manual verification takes 2–5 minutes. Contact support if delayed.</div>
+  </div>
+</section>
+
+<!-- PREDICTION PAGE -->
+<section id="prediction-page">
+  <div class="app-wrap">
+    <div class="topbar">
+      <div class="tb-home" onclick="MXW.goHome()"><i class="fas fa-home"></i></div>
+      <div class="tb-live"><span class="live-dot"></span><span class="live-lbl">LIVE AI</span></div>
+      <div class="tb-sound" onclick="MXW.toggleSound()"><i id="sound-ico" class="fas fa-volume-up"></i></div>
+    </div>
+    <div class="tgt-header">
+      <div class="tgt-goal" id="tgt-goal">Target: ₹350 → ₹1,500</div>
+      <div class="tgt-badges" id="tgt-badges"></div>
+    </div>
+    <div class="stats-row">
+      <div class="st-box"><div class="st-val" id="st-bal" style="color:var(--G);">₹0</div><div class="st-lbl">Balance</div></div>
+      <div class="st-box"><div class="st-val" id="st-wr" style="color:var(--GOLD);">--%</div><div class="st-lbl">Win Rate</div></div>
+      <div class="st-box"><div class="st-val" id="st-pg" style="color:var(--T);">0%</div><div class="st-lbl">Progress</div></div>
+    </div>
+    <div class="cd-box">
+      <div class="cd-lbl"><i class="fas fa-clock"></i> NEXT PERIOD IN</div>
+      <div class="cd-val" id="cd-val">00:00</div>
+      <div class="cd-period">Period: <span id="cur-period" style="color:var(--GOLD);font-family:'Orbitron',sans-serif;font-size:.8rem;">LOADING…</span></div>
+    </div>
+    <div class="mr-wrap">
+      <div class="mr-lbl"><i class="fas fa-history"></i> LAST 10 RESULTS</div>
+      <div class="mr-chips" id="mr-chips"></div>
+    </div>
+    <div class="manip-panel">
+      <div class="manip-title"><i class="fas fa-eye"></i> WINGO MANIPULATION DETECTOR</div>
+      <div class="manip-grid">
+        <div class="m-card" id="mc-pattern"><div class="mc-label">Current Pattern</div><div class="mc-val" id="mc-pattern-v" style="color:var(--T);">SCANNING…</div><div class="mc-tag safe" id="mc-pattern-t">ANALYZING</div></div>
+        <div class="m-card" id="mc-manip"><div class="mc-label">Manipulation Type</div><div class="mc-val" id="mc-manip-v" style="color:var(--OR);">DETECTING…</div><div class="mc-tag safe" id="mc-manip-t">CHECKING</div></div>
+        <div class="m-card" id="mc-trap"><div class="mc-label">Trap Probability</div><div class="mc-val" id="mc-trap-v" style="color:var(--R);">--%</div><div style="font-size:.6rem;color:#444;margin-top:2px;">How likely WINGO traps</div></div>
+        <div class="m-card" id="mc-next"><div class="mc-label">AI Prediction Basis</div><div class="mc-val" id="mc-next-v" style="color:var(--G);">--</div><div class="mc-tag safe" id="mc-next-t">COMPUTING</div></div>
+      </div>
+      <div class="manip-alert" id="manip-alert-box"><strong>🔍 AI Status:</strong> <span id="manip-alert-msg">Initializing manipulation detection engine…</span></div>
+    </div>
+    <div class="prob-panel">
+      <div class="prob-title">📊 NEXT RESULT PROBABILITY</div>
+      <div class="pb-row"><div class="pb-lbl cr">🔴 RED</div><div class="pb-wrap"><div class="pb-fill r" id="pb-r" style="width:33%;"></div></div><div class="pb-pct cr" id="pp-r">33%</div><div class="pb-crown" id="pw-r"></div></div>
+      <div class="pb-row"><div class="pb-lbl cg">🟢 GREEN</div><div class="pb-wrap"><div class="pb-fill g" id="pb-g" style="width:33%;"></div></div><div class="pb-pct cg" id="pp-g">33%</div><div class="pb-crown" id="pw-g"></div></div>
+      <div class="pb-row"><div class="pb-lbl cv">🟣 VIOLET</div><div class="pb-wrap"><div class="pb-fill v" id="pb-v" style="width:10%;"></div></div><div class="pb-pct cv" id="pp-v">10%</div><div class="pb-crown" id="pw-v"></div></div>
+      <div style="height:1px;background:rgba(255,255,255,.05);margin:6px 0;"></div>
+      <div class="pb-row"><div class="pb-lbl cb">⬆ BIG</div><div class="pb-wrap"><div class="pb-fill b" id="pb-b" style="width:50%;"></div></div><div class="pb-pct cb" id="pp-b">50%</div><div class="pb-crown" id="pw-b"></div></div>
+      <div class="pb-row"><div class="pb-lbl cs">⬇ SMALL</div><div class="pb-wrap"><div class="pb-fill s" id="pb-s" style="width:50%;"></div></div><div class="pb-pct cs" id="pp-s">50%</div><div class="pb-crown" id="pw-s"></div></div>
+    </div>
+    <div class="pred-main">
+      <div class="pred-tag">🤖 AI SMART PREDICTION</div>
+      <div class="pred-val" id="pred-val">--</div>
+      <div class="pred-type" id="pred-type">INITIALIZING ENGINE…</div>
+      <div class="conf-box">
+        <div class="conf-lbl">Prediction Confidence</div>
+        <div class="conf-track"><div class="conf-bar" id="conf-bar" style="width:50%;background:linear-gradient(90deg,#ff3355,#ffd700,#00ff88);"></div></div>
+        <div class="conf-text" id="conf-text" style="color:var(--GOLD);">--</div>
+      </div>
+      <div class="streak-bar" id="streak-bar"><span id="streak-flames"></span><span class="streak-t" id="streak-text">Waiting for first result…</span></div>
+      <div class="bet-display" id="bet-display">Bet: ₹0</div>
+      <div class="levels-row">
+        <div class="lv" id="lv1"><div class="lv-n">LEVEL 1</div><div class="lv-p">15%</div><div class="lv-a" id="lv1-a">₹0</div></div>
+        <div class="lv" id="lv2"><div class="lv-n">LEVEL 2</div><div class="lv-p">30%</div><div class="lv-a" id="lv2-a">₹0</div></div>
+        <div class="lv" id="lv3"><div class="lv-n">LEVEL 3</div><div class="lv-p">55%</div><div class="lv-a" id="lv3-a">₹0</div></div>
+      </div>
+      <div class="hc-panel">
+        <div class="hc-title">🔥 HOT &amp; ❄️ COLD NUMBERS (Last 30)</div>
+        <div class="hc-chips" id="hc-chips"></div>
+      </div>
+      <div class="ai-log">
+        <div class="ai-log-title">🧠 AI ANALYSIS LOG</div>
+        <div id="ai-log-entries"><div class="ai-log-entry"><span class="ai-icon">⚡</span><span>Engine initializing…</span></div></div>
+      </div>
+    </div>
+    <div class="hist-panel">
+      <div class="hist-head"><span class="hist-title">📋 PREDICTION HISTORY</span><span id="hist-summary" style="font-size:.68rem;color:#666;">--</span></div>
+      <div id="hist-items"><div style="text-align:center;padding:16px;color:#555;font-size:.8rem;">No predictions yet…</div></div>
+    </div>
+    <div style="text-align:center;margin-top:14px;font-size:.65rem;color:#333;">© Mickey X Web | Ultra Pro Predictor v6.0</div>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   ALL CODE WRAPPED IN IIFE - NO GLOBAL FUNCTION EXPOSURE
+   (Prevents console-based exploitation)
+═══════════════════════════════════════════════════════════ */
+(function(){
+'use strict';
+
+/* ════════ FIREBASE ════════ */
+firebase.initializeApp({
+  apiKey:"AIzaSyCShaI7FfDCvZ9t21RdBk7ATjk5PQUAeQI",
+  authDomain:"wingo-predictor-hub.firebaseapp.com",
+  databaseURL:"https://wingo-predictor-hub-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId:"wingo-predictor-hub",
+  storageBucket:"wingo-predictor-hub.firebasestorage.app",
+  messagingSenderId:"510934626240",
+  appId:"1:510934626240:web:8df9c4b4a78964f15d2225"
+});
+const DB = firebase.database();
+
+/* ════════ MATRIX RAIN ════════ */
+(function(){
+  const c=document.getElementById('matrix-canvas');
+  const ctx=c.getContext('2d');
+  function resize(){c.width=window.innerWidth;c.height=window.innerHeight;}
+  resize(); window.addEventListener('resize',resize);
+  const cols=Math.floor(c.width/16);
+  const drops=Array(cols).fill(1);
+  const chars='01REDGREENBIGSMALL'.split('');
+  setInterval(()=>{
+    ctx.fillStyle='rgba(5,0,5,.05)';ctx.fillRect(0,0,c.width,c.height);
+    ctx.fillStyle='#bc13fe';ctx.font='13px monospace';
+    drops.forEach((y,i)=>{ctx.fillText(chars[Math.floor(Math.random()*chars.length)],i*16,y*16);if(y*16>c.height&&Math.random()>.975)drops[i]=0;drops[i]++;});
+  },60);
+})();
+
+/* ════════ PARTICLES ════════ */
+particlesJS("pg",{particles:{number:{value:40,density:{enable:true,value_area:900}},color:{value:"#bc13fe"},shape:{type:"circle"},opacity:{value:.2},size:{value:2},line_linked:{enable:true,distance:130,color:"#bc13fe",opacity:.12,width:1},move:{enable:true,speed:1.2,direction:"none",out_mode:"bounce"}}});
+
+/* ════════ LIVE STATS ════════ */
+let _u=247,_w=1843;
+document.getElementById('live-users').textContent=_u;
+document.getElementById('live-wins').textContent=_w;
+setInterval(()=>{
+  _u+=Math.floor(Math.random()*3)-1;_u=Math.max(200,Math.min(400,_u));
+  _w+=Math.floor(Math.random()*2);
+  document.getElementById('live-users').textContent=_u;
+  document.getElementById('live-wins').textContent=_w;
+},3500);
+document.getElementById('ticker-text').textContent=[
+  "Rahul earned ₹3500","Priya hit ₹10000 target","Amit won ₹1500","Sneha profit ₹25000",
+  "Vikram earned ₹50000","Riya won ₹3500","Mohit hit target ₹70000","Deepak profit ₹10000"
+].join('   🎉   ');
+
+/* ════════ DEAL COUNTDOWN ════════ */
+(function(){
+  let total=23*60+47;
+  const el=document.getElementById('deal-countdown');
+  setInterval(()=>{
+    if(total<=0)total=24*60;
+    total--;
+    const m=String(Math.floor(total/60)).padStart(2,'0');
+    const s=String(total%60).padStart(2,'0');
+    if(el)el.textContent=`${m}:${s}`;
+  },1000);
+})();
+
+/* ════════ PLATFORM LIVE USER COUNT FLUCTUATION ════════ */
+const platformBases={'TASHAN':124,'DMWIN':98,'DAMAN':211,'JALWA':76};
+Object.keys(platformBases).forEach(k=>{
+  setInterval(()=>{
+    platformBases[k]+=Math.floor(Math.random()*5)-2;
+    platformBases[k]=Math.max(40,Math.min(350,platformBases[k]));
+    const el=document.getElementById(`pstat-${k}`);
+    if(el)el.textContent=`${platformBases[k]} Online`;
+  },4000);
+});
+
+/* ════════ CONFIG ════════ */
+const API="https://wingolast100.vercel.app/api/results?typeId=1&apiKey=12a04165-748c-4144-9398-96bd2e0ad956&token=1a97a413-ff57-4097-a44c-4bd402ace8d5&limit=100";
+const TARGETS={
+  "350-1500" :{start:350,  target:1500,  price:250,  booster:50,  ins:100},
+  "500-3500" :{start:500,  target:3500,  price:500,  booster:100, ins:200},
+  "1000-10000":{start:1000,target:10000, price:999,  booster:200, ins:400},
+  "2500-25000":{start:2500,target:25000, price:1500, booster:300, ins:600},
+  "5000-50000":{start:5000,target:50000, price:2500, booster:500, ins:1000},
+  "1000-35000":{start:1000,target:35000, price:5000, booster:1000,ins:2000},
+  "2000-70000":{start:2000,target:70000, price:10000,booster:2000,ins:4000}
+};
+
+/* ════════ STATE (inside IIFE - not accessible from console) ════════ */
+let results=[],platform='',targetKey='',basePrice=0;
+let balance=0,targetGoal=0,lvl=1,betAmt=0,origBal=0;
+let history=[],wins=0,losses=0,totalP=0;
+let userId='',payId='';
+let accBooster=false,insActive=false,accPrice=0,insPrice=0,totalPay=0;
+let curPeriod='',lastPredTime=0;
+let soundOn=true,cdTimer=null,cdStart=null;
+const CD=60;
+let consecLosses=0,manipMemory=[],learnWeights={RED:1,GREEN:1,BIG:1,SMALL:1},aiLog=[];
+let lastActual=null,lastPred=null;
+let approvalListener=null;
+let sessionVerified=false; // Must be true before prediction page shows
+
+/* ════════ USER ID (simple session-based) ════════ */
+function uid(){
+  let id=sessionStorage.getItem('mxw6_uid');
+  if(!id){id='u6_'+Date.now()+'_'+Math.random().toString(36).substr(2,9);sessionStorage.setItem('mxw6_uid',id);}
+  return id;
+}
+userId=uid();
+
+/* ════════ TOAST ════════ */
+function showToast(msg,isError=false){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(isError?' error':'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+/* ════════ PAGE NAVIGATION ════════ */
+function goTo(id){
+  document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+  const el=document.getElementById(id);
+  if(el)el.style.display='flex';
+}
+
+/* ════════ API FETCH ════════ */
+async function fetchAPI(){
+  try{const r=await fetch(API);if(!r.ok)throw 0;const d=await r.json();if(d.code===0&&d.data?.list){results=d.data.list;return true;}return false;}
+  catch(e){return false;}
+}
+
+/* ════════ PLATFORM FILTER ════════ */
+function filterPlatforms(query){
+  const q=query.toLowerCase();
+  document.querySelectorAll('.p-card').forEach(c=>{
+    const name=c.dataset.platform.toLowerCase();
+    c.style.display=name.includes(q)?'':'none';
+  });
+}
+
+function filterTab(btn,tag){
+  document.querySelectorAll('.p-ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.p-card').forEach(c=>{
+    if(tag==='all')c.style.display='';
+    else c.style.display=c.dataset.tag===tag?'':'none';
+  });
+}
+
+/* ════════ PLATFORM OPEN ════════ */
+function openTarget(plat){
+  platform=plat;
+  // Highlight selected card
+  document.querySelectorAll('.p-card').forEach(c=>{
+    c.classList.toggle('selected',c.dataset.platform===plat);
+  });
+  // Show selected bar
+  document.getElementById('selected-platform-name').textContent=plat;
+  document.getElementById('platform-selected-bar').classList.add('show');
+  document.getElementById('target-platform-sub').textContent=`Platform: ${plat} — Choose your target`;
+  setTimeout(()=>goTo('target-page'),300);
+}
+
+/* ════════ PLAN SORT ════════ */
+function sortPlans(btn,tier){
+  document.querySelectorAll('.plan-sort-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.t-card').forEach(c=>{
+    if(tier==='all')c.style.display='';
+    else c.style.display=c.dataset.tier===tier?'':'none';
+  });
+}
+
+/* ════════ TARGET SELECT ════════ */
+function selectTarget(key,price){
+  targetKey=key;basePrice=price;accBooster=false;insActive=false;
+  const cfg=TARGETS[key];
+  accPrice=cfg.booster;insPrice=cfg.ins;totalPay=price;
+  document.getElementById('ao-target-name').textContent=`${key.replace('-',' → ₹')} | ₹${price}`;
+  document.getElementById('ao-acc-price').textContent=`₹${accPrice}`;
+  document.getElementById('ao-ins-price').textContent=`₹${insPrice}`;
+  document.getElementById('ao-total').textContent=`₹${totalPay}`;
+  document.getElementById('ao-acc-btn').className='ao-add';
+  document.getElementById('ao-acc-btn').innerHTML='<i class="fas fa-plus"></i> ADD';
+  document.getElementById('ao-ins-btn').className='ao-add';
+  document.getElementById('ao-ins-btn').innerHTML='<i class="fas fa-plus"></i> ADD';
+  document.getElementById('ao-acc-item').classList.remove('active');
+  document.getElementById('ao-ins-item').classList.remove('active');
+  goTo('addons-page');
+}
+
+function toggleAddon(type){
+  if(type==='acc'){
+    accBooster=!accBooster;
+    const btn=document.getElementById('ao-acc-btn');
+    btn.className='ao-add'+(accBooster?' on':'');
+    btn.innerHTML=accBooster?'<i class="fas fa-check"></i> ADDED':'<i class="fas fa-plus"></i> ADD';
+    document.getElementById('ao-acc-item').classList.toggle('active',accBooster);
+  }else{
+    insActive=!insActive;
+    const btn=document.getElementById('ao-ins-btn');
+    btn.className='ao-add'+(insActive?' on':'');
+    btn.innerHTML=insActive?'<i class="fas fa-check"></i> ADDED':'<i class="fas fa-plus"></i> ADD';
+    document.getElementById('ao-ins-item').classList.toggle('active',insActive);
+  }
+  totalPay=basePrice+(accBooster?accPrice:0)+(insActive?insPrice:0);
+  document.getElementById('ao-total').textContent=`₹${totalPay}`;
+}
+
+function skipAddon(type){
+  if(type==='acc'&&accBooster)toggleAddon('acc');
+  else if(type==='ins'&&insActive)toggleAddon('ins');
+  if(type==='acc'&&!insActive)goTo('addons-page');
+  else if(type==='ins')showPayment();
+  else if(type==='acc'){}
+}
+
+/* ════════ SHOW PAYMENT ════════ */
+function showPayment(){
+  document.getElementById('ps-platform').textContent=platform;
+  document.getElementById('ps-target').textContent=`${targetKey.replace('-',' → ₹')} — ₹${basePrice}`;
+  const ar=document.getElementById('ps-acc-row'),ir=document.getElementById('ps-ins-row');
+  ar.style.display=accBooster?'flex':'none';if(accBooster)document.getElementById('ps-acc').textContent=`₹${accPrice}`;
+  ir.style.display=insActive?'flex':'none';if(insActive)document.getElementById('ps-ins').textContent=`₹${insPrice}`;
+  document.getElementById('ps-total').textContent=`₹${totalPay}`;
+  document.getElementById('pay-amt-big').textContent=`Pay ₹${totalPay}`;
+  document.getElementById('pay-amt-inline').textContent=`₹${totalPay}`;
+  // Reset payment form
+  document.getElementById('utr-inp').value='';
+  document.getElementById('utr-inp').disabled=false;
+  document.getElementById('pay-submit-btn').disabled=false;
+  document.getElementById('approval-box').classList.remove('show');
+  goTo('payment-page');
+}
+
+function validateUTR(inp){
+  const v=inp.value.trim();
+  const err=document.getElementById('utr-error');
+  err.style.display=v.length>0&&v.length<10?'block':'none';
+}
+
+function copyUPI(){
+  const upi=document.getElementById('upi-display').textContent;
+  navigator.clipboard.writeText(upi).then(()=>showToast('UPI ID copied!')).catch(()=>showToast('Copy manually: '+upi));
+}
+
+/* ════════ SUBMIT PAYMENT ════════ */
+function submitPay(){
+  const utr=document.getElementById('utr-inp').value.trim();
+  if(!utr||utr.length<10){showToast('Valid UTR required (min 10 digits)',true);return;}
+  // Disable to prevent double submit
+  document.getElementById('pay-submit-btn').disabled=true;
+  document.getElementById('utr-inp').disabled=true;
+
+  payId='pr6_'+Date.now();
+  DB.ref('px_secure_v7/'+payId).set({
+    userId,platform,target:targetKey,amount:totalPay,basePrice,
+    accuracyBooster:accBooster,insurance:insActive,
+    boosterPrice:accBooster?accPrice:0,insurancePrice:insActive?insPrice:0,
+    utr,status:'pending',timestamp:Date.now()
+  }).then(()=>{
+    document.getElementById('approval-box').classList.add('show');
+    startApprovalCD(300);
+    startCheckingApproval();
+    updateApprovalStep('Payment submitted. Admin verifying...');
+  }).catch(()=>{
+    showToast('Error submitting. Please try again.',true);
+    document.getElementById('pay-submit-btn').disabled=false;
+    document.getElementById('utr-inp').disabled=false;
+  });
+}
+
+function startApprovalCD(sec){
+  let s=sec;
+  const el=document.getElementById('approval-cd');
+  const steps=['Payment submitted. Admin verifying...','Checking transaction ID...','Verifying amount on blockchain...','Finalizing access...'];
+  let stepIdx=0;
+  const iv=setInterval(()=>{
+    s--;if(s<0){clearInterval(iv);return;}
+    if(el)el.textContent=`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    // Rotate step labels
+    const newIdx=Math.floor((sec-s)/(sec/steps.length));
+    if(newIdx!==stepIdx&&newIdx<steps.length){stepIdx=newIdx;updateApprovalStep(steps[stepIdx]);}
+  },1000);
+}
+
+function updateApprovalStep(msg){
+  const el=document.getElementById('approval-step-lbl');
+  if(el)el.textContent=msg;
+}
+
+/* ════════ CHECK APPROVAL — FIREBASE REAL-TIME ════════ */
+function startCheckingApproval(){
+  // Remove old listener if any
+  if(approvalListener)DB.ref('px_secure_v7/'+payId).off('value',approvalListener);
+  approvalListener=DB.ref('px_secure_v7/'+payId).on('value',snap=>{
+    const r=snap.val();
+    if(!r)return;
+    if(r.status==='approved'){
+      DB.ref('px_secure_v7/'+payId).off('value',approvalListener);
+      showToast('✅ Payment Approved! Opening predictor...');
+      setTimeout(()=>startSession(),1500);
+    }else if(r.status==='rejected'){
+      DB.ref('px_secure_v7/'+payId).off('value',approvalListener);
+      document.getElementById('approval-box').classList.remove('show');
+      document.getElementById('pay-submit-btn').disabled=false;
+      document.getElementById('utr-inp').disabled=false;
+      showToast('❌ Payment rejected. Contact support.',true);
+    }
+  });
+}
+
+/* ════════ START SESSION (ONLY after Firebase approval confirmed) ════════ */
+function startSession(){
+  // Double-verify approval from Firebase before opening prediction page
+  DB.ref('px_secure_v7/'+payId).once('value').then(snap=>{
+    const r=snap.val();
+    if(!r||r.status!=='approved'){
+      showToast('Session not authorized.',true);
+      return;
+    }
+    sessionVerified=true;
+    _initSession();
+  });
+}
+
+function _initSession(){
+  const cfg=TARGETS[targetKey];
+  balance=cfg.start;targetGoal=cfg.target;origBal=balance;
+  lvl=1;consecLosses=0;lastPred=null;lastActual=null;
+  history=[];wins=0;losses=0;totalP=0;
+  manipMemory=[];learnWeights={RED:1,GREEN:1,BIG:1,SMALL:1};aiLog=[];
+
+  // Save session to Firebase
+  DB.ref('sessions/'+userId).set({
+    status:'active',platform,target:targetKey,
+    currentBalance:balance,targetAmount:targetGoal,
+    accuracyBooster:accBooster,insurance:insActive,
+    approvedPayId:payId,startedAt:Date.now()
+  });
+
+  document.getElementById('tgt-goal').textContent=`Target: ₹${cfg.start} → ₹${cfg.target}`;
+  document.getElementById('st-bal').textContent=`₹${balance}`;
+  const bg=document.getElementById('tgt-badges');let bh='';
+  if(accBooster)bh+='<div class="tbadge tbadge-acc"><i class="fas fa-bolt"></i> 90% ACC</div>';
+  if(insActive)bh+='<div class="tbadge tbadge-ins"><i class="fas fa-shield-alt"></i> INSURED</div>';
+  bg.innerHTML=bh;
+  updateBets();
+  ['landing-page','target-page','addons-page','payment-page'].forEach(p=>document.getElementById(p).style.display='none');
+  document.getElementById('prediction-page').style.display='block';
+  startCD();
+  startPredictor();
+}
+
+function openSupport(){window.open('https://t.me/Predict456','_blank');}
+
+/* ════════ HELPER FUNCTIONS ════════ */
+function getInfo(n){
+  n=parseInt(n);
+  return{n,size:n>=5?'BIG':'SMALL',color:(n===0||n===5)?'VIOLET':(n%2===0?'RED':'GREEN')};
+}
+
+/* ════════ AI ENGINE — unchanged from v5 ════════ */
+function detectManipulationType(){
+  if(!results||results.length<10)return{type:'UNKNOWN',confidence:0};
+  const last10=results.slice(0,10).map(r=>getInfo(r.number));
+  const last5=last10.slice(0,5);
+  let cStreak=1,sStreak=1;
+  for(let i=1;i<last10.length;i++){if(last10[i].color===last10[0].color)cStreak++;else break;}
+  for(let i=1;i<last10.length;i++){if(last10[i].size===last10[0].size)sStreak++;else break;}
+  let cAlt=true,sAlt=true;
+  for(let i=1;i<Math.min(6,last5.length);i++){if(last5[i].color===last5[i-1].color)cAlt=false;if(last5[i].size===last5[i-1].size)sAlt=false;}
+  const hadStreak3=(()=>{let s=1;for(let i=1;i<last10.length;i++){if(last10[i].color===last10[i-1].color)s++;else break;}return s>=3;})();
+  let transitions=0;for(let i=1;i<last10.length;i++)if(last10[i].color!==last10[i-1].color)transitions++;
+  const transRate=transitions/9;
+  const recentLosses=manipMemory.slice(-5).filter(m=>m.isLoss);
+  const lossOnPredicted=recentLosses.filter(m=>{
+    if(m.ourPred==='RED'&&m.actual.color==='GREEN')return true;
+    if(m.ourPred==='GREEN'&&m.actual.color==='RED')return true;
+    if(m.ourPred==='BIG'&&m.actual.size==='SMALL')return true;
+    if(m.ourPred==='SMALL'&&m.actual.size==='BIG')return true;
+    return false;
+  }).length;
+  let type='STABLE',conf=40;
+  if(lossOnPredicted>=3){type='POPULAR_AVOID';conf=85;}
+  else if(cStreak>=4||sStreak>=4){type='STREAK_TRAP';conf=75;}
+  else if(cAlt&&sAlt&&hadStreak3){type='OSCILLATE_BREAK';conf=70;}
+  else if(transRate>.7){type='RANDOM_SPIKE';conf=65;}
+  else if(cAlt&&sAlt){type='OSCILLATING';conf=60;}
+  else{type='STABLE';conf=50;}
+  return{type,conf,cStreak,sStreak,cAlt,sAlt,transRate,lossOnPredicted};
+}
+
+function computeAllProbabilities(manip){
+  if(!results||results.length<15)return null;
+  const last50=results.slice(0,50),last20=results.slice(0,20);
+  let rawR=0,rawG=0,rawV=0,rawB=0,rawS=0;
+  last20.forEach(r=>{const{color,size}=getInfo(r.number);if(color==='RED')rawR++;else if(color==='GREEN')rawG++;else rawV++;if(size==='BIG')rawB++;else rawS++;});
+  const lastInfo=getInfo(results[0].number);
+  let mxR=0,mxG=0,mxV=0,mxB=0,mxS=0,mxTotal=0;
+  for(let i=0;i<last50.length-1;i++){const cur=getInfo(last50[i].number),nxt=getInfo(last50[i+1].number);if(cur.color===lastInfo.color&&cur.size===lastInfo.size){if(nxt.color==='RED')mxR++;else if(nxt.color==='GREEN')mxG++;else mxV++;if(nxt.size==='BIG')mxB++;else mxS++;mxTotal++;}}
+  if(mxTotal>0){mxR/=mxTotal;mxG/=mxTotal;mxV/=mxTotal;mxB/=mxTotal;mxS/=mxTotal;}else{mxR=mxG=.33;mxV=.1;mxB=mxS=.5;}
+  let{cStreak=1,sStreak=1,cAlt=false,sAlt=false}=manip;
+  let sbC={RED:0,GREEN:0},sbS={BIG:0,SMALL:0};
+  if(cStreak>=5){if(lastInfo.color==='RED'){sbC.RED-=25;sbC.GREEN+=25;}else{sbC.GREEN-=25;sbC.RED+=25;}}else if(cStreak>=3){if(lastInfo.color==='RED'){sbC.RED-=15;sbC.GREEN+=15;}else{sbC.GREEN-=15;sbC.RED+=15;}}else if(cStreak>=2){if(lastInfo.color==='RED'){sbC.RED-=8;sbC.GREEN+=8;}else{sbC.GREEN-=8;sbC.RED+=8;}}
+  if(sStreak>=5){if(lastInfo.size==='BIG'){sbS.BIG-=25;sbS.SMALL+=25;}else{sbS.SMALL-=25;sbS.BIG+=25;}}else if(sStreak>=3){if(lastInfo.size==='BIG'){sbS.BIG-=15;sbS.SMALL+=15;}else{sbS.SMALL-=15;sbS.BIG+=15;}}else if(sStreak>=2){if(lastInfo.size==='BIG'){sbS.BIG-=8;sbS.SMALL+=8;}else{sbS.SMALL-=8;sbS.BIG+=8;}}
+  if(cAlt){if(lastInfo.color==='RED'){sbC.GREEN+=18;sbC.RED-=12;}else{sbC.RED+=18;sbC.GREEN-=12;}}
+  if(sAlt){if(lastInfo.size==='BIG'){sbS.SMALL+=18;sbS.BIG-=12;}else{sbS.BIG+=18;sbS.SMALL-=12;}}
+  let mbC={RED:0,GREEN:0},mbS={BIG:0,SMALL:0};
+  switch(manip.type){
+    case'POPULAR_AVOID':if(rawR>rawG){mbC.RED-=20;mbC.GREEN+=20;}else{mbC.GREEN-=20;mbC.RED+=20;}if(rawB>rawS){mbS.BIG-=15;mbS.SMALL+=15;}else{mbS.SMALL-=15;mbS.BIG+=15;}break;
+    case'STREAK_TRAP':if(lastInfo.color==='RED'){mbC.GREEN+=15;}else{mbC.RED+=15;}break;
+    case'OSCILLATE_BREAK':if(lastInfo.color==='RED'){mbC.RED+=12;mbC.GREEN-=8;}else{mbC.GREEN+=12;mbC.RED-=8;}break;
+  }
+  const lwR=learnWeights.RED||1,lwG=learnWeights.GREEN||1,lwB=learnWeights.BIG||1,lwS=learnWeights.SMALL||1;
+  const bR=(mxR*40+(rawR/20)*25)/65,bG=(mxG*40+(rawG/20)*25)/65,bV=(mxV*40+(rawV/20)*25)/65,bB=(mxB*40+(rawB/20)*25)/65,bS=(mxS*40+(rawS/20)*25)/65;
+  let pR=bR*100+sbC.RED+mbC.RED,pG=bG*100+sbC.GREEN+mbC.GREEN,pV=bV*100,pB=bB*100+sbS.BIG+mbS.BIG,pS=bS*100+sbS.SMALL+mbS.SMALL;
+  pR*=lwR;pG*=lwG;pB*=lwB;pS*=lwS;
+  pR=Math.max(5,pR);pG=Math.max(5,pG);pV=Math.max(2,pV);pB=Math.max(5,pB);pS=Math.max(5,pS);
+  const cSum=pR+pG+pV;pR=Math.round(pR/cSum*95);pG=Math.round(pG/cSum*95);pV=95-pR-pG;
+  const sSum=pB+pS;pB=Math.round(pB/sSum*100);pS=100-pB;
+  return{pR,pG,pV,pB,pS,lastColor:lastInfo.color,lastSize:lastInfo.size};
+}
+
+function decidePrediction(probs,manip){
+  if(!probs)return null;
+  const{pR,pG,pV,pB,pS}=probs;
+  const colorChoice=pR>=pG?{val:'RED',pct:pR,type:'color'}:{val:'GREEN',pct:pG,type:'color'};
+  const sizeChoice=pB>=pS?{val:'BIG',pct:pB,type:'size'}:{val:'SMALL',pct:pS,type:'size'};
+  let chosen;
+  if(colorChoice.pct>=sizeChoice.pct){chosen=colorChoice;}else{chosen=sizeChoice;}
+  if(accBooster&&Math.random()<.12){chosen=colorChoice.pct>=sizeChoice.pct?sizeChoice:colorChoice;}
+  let confPct=chosen.pct;
+  if(accBooster)confPct=Math.min(96,confPct+8);
+  const confLvl=confPct>=80?'VERY HIGH':confPct>=65?'HIGH':confPct>=50?'MEDIUM':'LOW';
+  const confColor=confPct>=80?'#00ff88':confPct>=65?'#ffd700':confPct>=50?'#ff9900':'#ff3355';
+  return{...chosen,confPct,confLvl,confColor,manip:manip.type};
+}
+
+function updateManipUI(manip,probs){
+  const patterns={'STABLE':'Steady Pattern','OSCILLATING':'Alternating R/G','STREAK_TRAP':'Streak Detected','POPULAR_AVOID':'Avoiding Popular','OSCILLATE_BREAK':'Alt Breaking','RANDOM_SPIKE':'Random Mode','UNKNOWN':'Analyzing...'};
+  const mpv=document.getElementById('mc-pattern-v'),mpt=document.getElementById('mc-pattern-t');
+  const mmv=document.getElementById('mc-manip-v'),mmt=document.getElementById('mc-manip-t');
+  const mtv=document.getElementById('mc-trap-v');
+  const mnv=document.getElementById('mc-next-v'),mnt=document.getElementById('mc-next-t');
+  mpv.textContent=patterns[manip.type]||manip.type;
+  mpt.className='mc-tag '+(manip.conf>70?'crit':manip.conf>50?'warn':'safe');
+  mpt.textContent=`${manip.conf}% CONF`;
+  mmv.textContent=manip.type.replace('_',' ');
+  mmt.className='mc-tag '+(manip.type==='POPULAR_AVOID'||manip.type==='STREAK_TRAP'?'crit':manip.type==='STABLE'?'safe':'warn');
+  mmt.textContent=manip.type==='STABLE'?'NORMAL':'ACTIVE';
+  const trap=manip.type==='STREAK_TRAP'?75:manip.type==='POPULAR_AVOID'?85:manip.type==='OSCILLATING'?45:30;
+  mtv.textContent=`${trap}%`;
+  mtv.style.color=trap>70?'var(--R)':trap>50?'var(--OR)':'var(--G)';
+  if(probs){
+    const best=probs.pR>=probs.pG?(probs.pR>=probs.pB?'RED dominant':'BIG dominant'):(probs.pG>=probs.pB?'GREEN dominant':'BIG dominant');
+    mnv.textContent=best;
+    mnt.className='mc-tag '+(probs.pR>=55||probs.pG>=55||probs.pB>=55?'warn':'safe');
+    mnt.textContent='AI COMPUTED';
+  }
+  const alertMsgs={'STABLE':'Pattern is stable. AI operating at optimal accuracy.','STREAK_TRAP':'⚠ Streak trap detected! AI counter-analyzing pattern reversal.','POPULAR_AVOID':'⚠ WINGO avoiding popular choices! AI adapting strategy.','OSCILLATING':'Alternating pattern active. AI tracking flip timing.','OSCILLATE_BREAK':'Break point approaching in alternation sequence.','RANDOM_SPIKE':'Random phase detected. AI using Markov chain analysis.'};
+  document.getElementById('manip-alert-msg').textContent=alertMsgs[manip.type]||'Analyzing...';
+}
+
+function updateProbBars(probs){
+  if(!probs)return;
+  const pairs=[['pb-r','pp-r','pw-r',probs.pR,'cr'],['pb-g','pp-g','pw-g',probs.pG,'cg'],['pb-v','pp-v','pw-v',probs.pV,'cv'],['pb-b','pp-b','pw-b',probs.pB,'cb'],['pb-s','pp-s','pw-s',probs.pS,'cs']];
+  let maxC=Math.max(probs.pR,probs.pG,probs.pV),maxS=Math.max(probs.pB,probs.pS);
+  pairs.forEach(([b,p,w,val,cls])=>{
+    document.getElementById(b).style.width=val+'%';
+    document.getElementById(p).textContent=val+'%';
+    const isMaxC=(cls==='cr'&&val===maxC)||(cls==='cg'&&val===maxC)||(cls==='cv'&&val===maxC);
+    const isMaxS=(cls==='cb'&&val===maxS)||(cls==='cs'&&val===maxS);
+    document.getElementById(w).textContent=(isMaxC||isMaxS)?'👑':'';
+  });
+}
+
+function updateBets(){
+  const b1=Math.floor(balance*.15),b2=Math.floor(balance*.3),b3=Math.floor(balance*.55);
+  betAmt=lvl===1?b1:lvl===2?b2:b3;
+  document.getElementById('bet-display').textContent=`Bet: ₹${betAmt}`;
+  document.getElementById('lv1-a').textContent=`₹${b1}`;
+  document.getElementById('lv2-a').textContent=`₹${b2}`;
+  document.getElementById('lv3-a').textContent=`₹${b3}`;
+  ['lv1','lv2','lv3'].forEach((id,i)=>document.getElementById(id).classList.toggle('active',lvl===i+1));
+}
+
+function addAILog(msg){
+  aiLog.unshift(msg);if(aiLog.length>12)aiLog.pop();
+  const c=document.getElementById('ai-log-entries');
+  c.innerHTML=aiLog.map(e=>`<div class="ai-log-entry"><span class="ai-icon">⚡</span><span>${e}</span></div>`).join('');
+}
+
+function updateMiniResults(){
+  const chips=document.getElementById('mr-chips');
+  if(!results||!results.length){chips.innerHTML='';return;}
+  chips.innerHTML=results.slice(0,10).map(r=>{
+    const{n,color}=getInfo(r.number);
+    const cls=color==='RED'?'r':color==='GREEN'?'g':'v';
+    return`<div class="mr-chip ${cls}">${n}</div>`;
+  }).join('');
+}
+
+function updateHotCold(){
+  if(!results||results.length<30)return;
+  const freq={};
+  results.slice(0,30).forEach(r=>{const n=parseInt(r.number);freq[n]=(freq[n]||0)+1;});
+  const sorted=Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+  const hot=sorted.slice(0,3).map(x=>x[0]);
+  const cold=sorted.slice(-3).map(x=>x[0]);
+  const c=document.getElementById('hc-chips');
+  c.innerHTML=Array.from({length:10},(_,i)=>{
+    const cls=hot.includes(String(i))?'hot':cold.includes(String(i))?'cold':'norm';
+    return`<div class="hc-chip ${cls}">${i}</div>`;
+  }).join('');
+}
+
+let lastProcessedPeriod='';
+function startPredictor(){
+  fetchAPI().then(ok=>{
+    if(!ok)return;
+    runPredictor();
+    setInterval(()=>fetchAPI().then(()=>runPredictor()),8000);
+  });
+}
+
+function runPredictor(){
+  if(!results||!results.length)return;
+  updateMiniResults();updateHotCold();
+  const manip=detectManipulationType();
+  const probs=computeAllProbabilities(manip);
+  const decision=decidePrediction(probs,manip);
+  updateManipUI(manip,probs);
+  updateProbBars(probs);
+  if(!decision)return;
+
+  const periodNum=results[0]?.issueNumber||'--';
+  document.getElementById('cur-period').textContent=periodNum;
+
+  if(lastPred&&results[0]&&curPeriod&&results[0].issueNumber!==curPeriod){
+    // New result available — check our last prediction
+    const actual=getInfo(results[0].number);
+    let won=false;
+    if(lastPred.type==='color')won=(lastPred.val===actual.color||actual.color==='VIOLET');
+    else won=(lastPred.val===actual.size);
+    const isLoss=!won;
+    manipMemory.push({ourPred:lastPred.val,actual,isLoss,manipType:manip.type});
+    if(manipMemory.length>10)manipMemory.shift();
+    if(isLoss){
+      consecLosses++;
+      // Reduce weight for wrong prediction
+      if(lastPred.val in learnWeights)learnWeights[lastPred.val]=Math.max(.5,learnWeights[lastPred.val]*.85);
+      if(lvl<3)lvl++;
+    }else{
+      consecLosses=0;
+      if(lastPred.val in learnWeights)learnWeights[lastPred.val]=Math.min(1.5,learnWeights[lastPred.val]*1.08);
+      if(lvl>1)lvl--;
+    }
+    const betResult=won?Math.floor(betAmt*.95):-betAmt;
+    balance+=betResult;totalP+=betResult;
+    won?wins++:losses++;
+    const wr=wins+losses>0?Math.round(wins/(wins+losses)*100):0;
+    document.getElementById('st-wr').textContent=`${wr}%`;
+    document.getElementById('st-bal').textContent=`₹${balance}`;
+    const prog=Math.min(100,Math.round((balance-origBal)/(targetGoal-origBal)*100));
+    document.getElementById('st-pg').textContent=`${Math.max(0,prog)}%`;
+    const streakEl=document.getElementById('streak-text');
+    if(consecLosses>=2){streakEl.textContent=`⛔ Loss Streak: ${consecLosses}`;streakEl.className='streak-t l';}
+    else if(wins>losses&&wins>2){streakEl.textContent=`🔥 Win Streak! W:${wins} L:${losses}`;streakEl.className='streak-t w';}
+    else{streakEl.textContent=`W:${wins} L:${losses}`;streakEl.className='streak-t';}
+    history.unshift({pred:lastPred.val,actual:actual.color+'|'+actual.size,won,bet:betAmt,result:betResult,period:curPeriod});
+    if(history.length>50)history.pop();
+    updateHistoryUI();
+    updateBets();
+    // Save balance to Firebase
+    DB.ref('sessions/'+userId+'/currentBalance').set(balance);
+    if(balance>=targetGoal)showWin();
+    else if(balance<=0)showLose();
+    addAILog(`${won?'✅ WIN':'❌ LOSS'}: Predicted ${lastPred.val} → Actual ${actual.color}/${actual.size}`);
+    lastActual=actual;
+  }
+
+  // Make new prediction
+  lastPred=decision;curPeriod=results[0]?.issueNumber||'--';
+  const predEl=document.getElementById('pred-val');
+  predEl.textContent=decision.val;
+  predEl.style.color=decision.val==='RED'?'var(--R)':decision.val==='GREEN'?'var(--G)':decision.val==='BIG'?'var(--GOLD)':'var(--B)';
+  predEl.className='pred-val pred-flash';
+  const typeText={'RED':'🔴 Color Prediction','GREEN':'🟢 Color Prediction','BIG':'⬆ Size Prediction','SMALL':'⬇ Size Prediction'};
+  document.getElementById('pred-type').textContent=typeText[decision.val]||decision.val;
+  const confBar=document.getElementById('conf-bar');
+  confBar.style.width=decision.confPct+'%';
+  confBar.style.background=`linear-gradient(90deg,${decision.confColor},${decision.confColor})`;
+  document.getElementById('conf-text').textContent=`${decision.confPct}% — ${decision.confLvl}`;
+  document.getElementById('conf-text').style.color=decision.confColor;
+  addAILog(`🔮 Predicting: ${decision.val} (${decision.confPct}% confidence) [${decision.manip}]`);
+}
+
+function updateHistoryUI(){
+  const c=document.getElementById('hist-items');
+  if(!history.length){c.innerHTML='<div style="text-align:center;padding:16px;color:#555;font-size:.8rem;">No predictions yet…</div>';return;}
+  const wr=wins+losses>0?Math.round(wins/(wins+losses)*100):0;
+  document.getElementById('hist-summary').textContent=`W:${wins} L:${losses} | ${wr}%`;
+  c.innerHTML=history.slice(0,20).map(h=>`
+    <div class="hist-item ${h.won?'wi':'lo'}">
+      <div>
+        <span style="font-weight:700;font-size:.88rem;">${h.pred}</span>
+        <span style="font-size:.7rem;color:#666;margin-left:6px;">→ ${h.actual}</span>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:.82rem;color:${h.won?'var(--G)':'var(--R)'};">${h.won?'+':''}₹${h.result}</div>
+        <div style="font-size:.62rem;color:#444;">#${h.period}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ════════ COUNTDOWN ════════ */
+function startCD(){
+  if(cdTimer)clearInterval(cdTimer);
+  cdStart=Date.now();
+  cdTimer=setInterval(()=>{
+    const elapsed=(Date.now()-cdStart)/1000;
+    const rem=CD-(elapsed%CD);
+    const s=Math.ceil(rem);
+    const el=document.getElementById('cd-val');
+    if(el){el.textContent=`00:${String(s).padStart(2,'0')}`;el.className='cd-val'+(s<=10?' urgent':'');}
+  },500);
+}
+
+/* ════════ SOUND ════════ */
+function toggleSound(){soundOn=!soundOn;document.getElementById('sound-ico').className=soundOn?'fas fa-volume-up':'fas fa-volume-mute';}
+
+/* ════════ GO HOME ════════ */
+function goHome(){
+  document.getElementById('prediction-page').style.display='none';
+  document.getElementById('popup-win').style.display='none';
+  document.getElementById('popup-lose').style.display='none';
+  sessionVerified=false;payId='';
+  DB.ref('sessions/'+userId).remove();
+  goTo('landing-page');
+}
+
+/* ════════ WIN / LOSE POPUPS ════════ */
+function showWin(){
+  document.getElementById('win-amount').textContent=targetGoal;
+  if(insActive)document.getElementById('ins-refund-msg').style.display='block';
+  document.getElementById('popup-win').style.display='flex';
+  DB.ref('sessions/'+userId).remove();
+}
+
+function showLose(){
+  const cfg=TARGETS[targetKey],disc=Math.floor(basePrice/2),ref=cfg.start+basePrice;
+  const t=document.getElementById('lose-title'),m=document.getElementById('lose-msg'),b=document.getElementById('lose-btn');
+  if(insActive){
+    t.textContent='INSURANCE ACTIVATED!';
+    m.innerHTML=`<p>Your insurance protects you!</p><p style="color:var(--PK);margin-top:12px;font-size:1.2rem;">₹${ref} Refund Approved!</p><p style="font-size:.82rem;color:#888;margin-top:8px;">Deposit ₹${cfg.start} + Fee ₹${basePrice} = ₹${ref}</p>`;
+    b.textContent='CLAIM REFUND';
+  }else{
+    t.textContent='TARGET MISSED!';
+    m.innerHTML=`<p>Balance lost. Don't give up!</p><p style="color:var(--GOLD);margin-top:10px;">50% Discount on Next Target</p><p style="color:var(--G);font-size:1.1rem;margin-top:6px;">Only ₹${disc} instead of ₹${basePrice}</p>`;
+    b.textContent='TRY AGAIN — 50% OFF';
+  }
+  document.getElementById('popup-lose').style.display='flex';
+}
+
+/* ════════ EXPOSE ONLY NEEDED FUNCTIONS GLOBALLY ════════ */
+window.MXW={
+  goTo,openTarget,filterPlatforms,filterTab,sortPlans,
+  selectTarget,toggleAddon,skipAddon,showPayment,
+  submitPay,validateUTR,copyUPI,openSupport,
+  goHome,toggleSound
+};
+
+/* ════════ ON LOAD ════════ */
+window.addEventListener('load',()=>{
+  fetchAPI();
+  // Restore session if valid and approved
+  DB.ref('sessions/'+userId).once('value').then(snap=>{
+    const s=snap.val();
+    if(s?.status==='active'&&Date.now()-s.startedAt<86400000){
+      // Verify the approval still exists in Firebase
+      DB.ref('px_secure_v7/'+s.approvedPayId).once('value').then(ps=>{
+        const pd=ps.val();
+        if(pd?.status==='approved'){
+          platform=s.platform;targetKey=s.target;
+          balance=s.currentBalance;targetGoal=s.targetAmount;
+          accBooster=s.accuracyBooster||false;insActive=s.insurance||false;
+          payId=s.approvedPayId;origBal=balance;
+          sessionVerified=true;
+          const cfg=TARGETS[targetKey];
+          document.getElementById('tgt-goal').textContent=`Target: ₹${cfg?.start} → ₹${targetGoal}`;
+          document.getElementById('st-bal').textContent=`₹${balance}`;
+          updateBets();
+          document.getElementById('landing-page').style.display='none';
+          document.getElementById('prediction-page').style.display='block';
+          startPredictor();
+        }else{
+          goTo('landing-page');
+          DB.ref('sessions/'+userId).remove();
+        }
+      });
+    }else{
+      goTo('landing-page');
+      if(s)DB.ref('sessions/'+userId).remove();
+    }
+  }).catch(()=>goTo('landing-page'));
+
+  // UTR enter key
+  document.getElementById('utr-inp').addEventListener('keypress',e=>{if(e.key==='Enter')MXW.submitPay();});
+});
+
+})(); // End IIFE
+</script>
+</body>
+</html>
